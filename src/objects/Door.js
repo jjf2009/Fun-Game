@@ -17,7 +17,7 @@ export class Door {
     this.frontTile = tileCenter(d.frontCol, d.frontRow);
     this.state = 'idle';
     this.student = null;
-    this.light = scene.add.circle(this.front.x + 14, this.front.y - dirY * 6, 4, 0xffd166).setDepth(2).setVisible(false);
+    this.light = scene.add.circle(this.front.x + 14, this.front.y - dirY * 6, 4, 0xffd166).setDepth(16).setVisible(false);
   }
 
   knock(time) {

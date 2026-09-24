@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONFIG, FONT } from '../config.js';
+import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { getBest, saveBest } from '../storage.js';
 
 const TITLES = [
@@ -24,10 +24,18 @@ export default class GameOverScene extends Phaser.Scene {
     const isNewBest = saveBest(score);
     const title = TITLES.filter(([min]) => score >= min).pop()[1];
 
-    this.add.text(480, 90, 'SUSPENDED FROM HOSTEL!', {
-      fontFamily: FONT, fontSize: '44px', color: '#ff4d6d', fontStyle: 'bold', stroke: '#000', strokeThickness: 8,
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x2a0f1a, 0x2a0f1a, 0x0b0d1f, 0x0b0d1f, 1);
+    bg.fillRect(0, 0, 960, 540);
+    this.add.text(480, 60, 'SUSPENDED FROM HOSTEL!', {
+      fontFamily: TITLE_FONT, fontSize: '26px', color: '#ff4d6d', stroke: '#000', strokeThickness: 8,
     }).setOrigin(0.5);
-    this.add.text(480, 150, `Rank: ${title}`, { fontFamily: FONT, fontSize: '22px', color: '#ffe066' }).setOrigin(0.5);
+    this.add.text(480, 105, `Rank: ${title}`, { fontFamily: FONT, fontSize: '24px', color: '#ffe066', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.rectangle(170, 250, 170, 170, 0x1d1a2b).setStrokeStyle(3, 0xffd166);
+    this.add.image(170, 250, 'face_warden').setScale(0.82);
+    this.add.text(170, 355, `${CONFIG.wardenName}:\n"Pack your bags!"`, {
+      fontFamily: FONT, fontSize: '16px', color: '#ffd166', align: 'center',
+    }).setOrigin(0.5);
 
     const lines = [
       `Score: ${score}${isNewBest ? '  (NEW BEST!)' : ''}`,
@@ -35,14 +43,14 @@ export default class GameOverScene extends Phaser.Scene {
       `Doors knocked: ${knocks}`,
       `Best score: ${getBest()}`,
     ];
-    this.add.text(480, 250, lines.join('\n'), {
-      fontFamily: FONT, fontSize: '20px', color: '#ffffff', align: 'center', lineSpacing: 10,
+    this.add.text(560, 240, lines.join('\n'), {
+      fontFamily: FONT, fontSize: '24px', color: '#ffffff', align: 'center', lineSpacing: 10,
     }).setOrigin(0.5);
 
-    const again = this.add.rectangle(480, 380, 280, 60, 0xffcc00).setStrokeStyle(4, 0x000000).setInteractive({ useHandCursor: true });
-    this.add.text(480, 380, 'PLAY AGAIN', { fontFamily: FONT, fontSize: '24px', color: '#000', fontStyle: 'bold' }).setOrigin(0.5);
+    const again = this.add.rectangle(560, 390, 300, 60, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
+    this.add.text(560, 392, 'PLAY AGAIN', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
 
-    const share = this.add.text(480, 450, 'Copy score to share on WhatsApp', {
+    const share = this.add.text(560, 460, 'Copy score to share on WhatsApp', {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     share.on('pointerdown', () => {

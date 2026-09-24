@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { FONT } from '../config.js';
+import { FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
 
 // A senior caught you! Finish a quick silly task before time runs out, or lose a life.
@@ -28,15 +28,17 @@ export default class RaggingScene extends Phaser.Scene {
 
     this.add.rectangle(480, 270, 960, 540, 0x000000, 0.72);
     this.add.rectangle(480, 270, 760, 440, 0x1d1a2b).setStrokeStyle(4, 0xd62828);
-    this.add.text(480, 72, 'CAUGHT BY A SENIOR!', {
-      fontFamily: FONT, fontSize: '28px', color: '#ff6b6b', fontStyle: 'bold', stroke: '#000', strokeThickness: 5,
+    this.add.text(480, 76, 'CAUGHT BY A SENIOR!', {
+      fontFamily: TITLE_FONT, fontSize: '20px', color: '#ff6b6b', stroke: '#000', strokeThickness: 6,
     }).setOrigin(0.5);
-    this.seniorImg = this.add.image(200, 220, 'senior').setScale(3.2);
-    this.add.text(200, 290, 'SENIOR', { fontFamily: FONT, fontSize: '14px', color: '#ff8fa3' }).setOrigin(0.5);
-    this.playerImg = this.add.image(200, 390, 'player').setScale(2);
+    this.add.rectangle(210, 200, 150, 150, 0x2d2a3e).setStrokeStyle(3, 0xd62828);
+    this.seniorImg = this.add.image(210, 200, 'face_senior').setScale(0.72);
+    this.add.text(210, 290, 'SENIOR', { fontFamily: FONT, fontSize: '16px', color: '#ff8fa3', fontStyle: 'bold' }).setOrigin(0.5);
+    this.tweens.add({ targets: this.seniorImg, angle: { from: -3, to: 3 }, duration: 400, yoyo: true, repeat: -1 });
+    this.playerImg = this.add.image(210, 385, 'face_player').setScale(0.42);
 
     this.speech = this.add.text(320, 120, '', {
-      fontFamily: FONT, fontSize: '18px', color: '#ffffff', wordWrap: { width: 480 },
+      fontFamily: FONT, fontSize: '19px', color: '#ffffff', wordWrap: { width: 480 },
       backgroundColor: '#2d2a3e', padding: { x: 10, y: 8 },
     });
 

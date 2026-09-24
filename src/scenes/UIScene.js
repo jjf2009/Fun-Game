@@ -12,20 +12,21 @@ export default class UIScene extends Phaser.Scene {
   create() {
     this.gs = this.scene.get('Game');
     this.isTouch = this.sys.game.device.input.touch;
-    const style = { fontFamily: FONT, fontSize: '16px', color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
+    const style = { fontFamily: FONT, fontSize: '18px', color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
 
     this.add.rectangle(480, 18, 960, 36, 0x000000, 0.5);
     this.nightText = this.add.text(12, 9, '', style);
     this.clockText = this.add.text(480, 9, '', { ...style, color: '#ffe066' }).setOrigin(0.5, 0);
     this.scoreText = this.add.text(948, 9, '', style).setOrigin(1, 0);
-    this.livesText = this.add.text(12, 42, '', { ...style, fontSize: '20px', color: '#ff4d6d' });
-    this.add.text(12, 70, 'FRESH', { ...style, fontSize: '12px' });
-    this.add.rectangle(64, 77, 150, 12, 0x000000, 0.6).setOrigin(0, 0.5);
-    this.freshBar = this.add.rectangle(64, 77, 150, 12, 0x4cc9f0).setOrigin(0, 0.5);
-    this.comboText = this.add.text(12, 90, '', { ...style, fontSize: '14px', color: '#80ffdb' });
-    this.statusText = this.add.text(948, 42, '', { ...style, fontSize: '13px', align: 'right' }).setOrigin(1, 0);
+    this.add.rectangle(8, 42, 196, 58, 0x000000, 0.45).setOrigin(0).setStrokeStyle(2, 0xffffff, 0.15);
+    this.hearts = Array.from({ length: CONFIG.lives }, (_, i) => this.add.image(26 + i * 26, 56, 'heart').setScale(1.1));
+    this.add.image(24, 84, 'drop');
+    this.add.rectangle(40, 84, 152, 12, 0x000000, 0.7).setOrigin(0, 0.5).setStrokeStyle(1, 0xffffff, 0.3);
+    this.freshBar = this.add.rectangle(41, 84, 150, 10, 0x4cc9f0).setOrigin(0, 0.5);
+    this.comboText = this.add.text(12, 106, '', { ...style, fontSize: '14px', color: '#80ffdb' });
+    this.statusText = this.add.text(948, 44, '', { ...style, fontSize: '15px', align: 'right' }).setOrigin(1, 0);
     this.hintText = this.add.text(480, this.isTouch ? 440 : 515, '', {
-      ...style, fontSize: '15px', backgroundColor: '#00000088', padding: { x: 6, y: 3 },
+      ...style, fontSize: '17px', backgroundColor: '#000000aa', padding: { x: 8, y: 4 },
     }).setOrigin(0.5);
 
     this.slots = [false, false, false];
@@ -106,7 +107,11 @@ export default class UIScene extends Phaser.Scene {
     const era = g.era === 'old' ? 'The Old Days' : 'Security Era';
     this.nightText.setText(`NIGHT ${g.night} · ${era}`);
     this.scoreText.setText(`SCORE ${g.score}`);
-    this.livesText.setText('♥'.repeat(Math.max(0, g.lives)) + '♡'.repeat(Math.max(0, CONFIG.lives - g.lives)));
+    this.hearts.forEach((h, i) => h.setTexture(i < g.lives ? 'heart' : 'heartEmpty'));
+    if (g.lives !== this.lastLives) {
+      if (this.lastLives !== undefined && g.lives < this.lastLives) this.tweens.add({ targets: this.hearts, scale: 1.6, duration: 120, yoyo: true });
+      this.lastLives = g.lives;
+    }
 
     // In-game clock: 11:00 PM -> 5:00 AM
     const elapsed = CONFIG.nightLength - Math.max(0, g.timeLeft);

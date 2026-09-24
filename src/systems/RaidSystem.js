@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONFIG } from '../config.js';
+import { CONFIG, FONT } from '../config.js';
 import { sfx } from '../sfx.js';
 
 // WARDEN CHECK: the warden is checking rooms for non-hostellers, and your friend is in your room!
@@ -22,8 +22,8 @@ export class RaidSystem {
     sfx.whistle();
     s.banner(`🚨 WARDEN CHECK! ${CONFIG.guestName} (a non-hosteller) is in your room. Sneak them out to the gate!`, '#ffd166');
     this.marker = s.add.text(s.myDoor.front.x, s.myDoor.front.y - 30, `${CONFIG.guestName} is inside!`, {
-      fontFamily: 'monospace', fontSize: '12px', color: '#000', backgroundColor: '#ffd166', padding: { x: 4, y: 2 },
-    }).setOrigin(0.5).setDepth(9);
+      fontFamily: FONT, fontSize: '13px', color: '#000', backgroundColor: '#ffd166', padding: { x: 4, y: 2 },
+    }).setOrigin(0.5).setDepth(17);
     s.tweens.add({ targets: this.marker, y: this.marker.y - 8, duration: 350, yoyo: true, repeat: -1 });
     return true;
   }
@@ -36,8 +36,8 @@ export class RaidSystem {
     this.trail = [];
     this.guest = s.physics.add.sprite(s.myDoor.front.x, s.myDoor.front.y + (s.myDoor.frontTile.y > s.myDoor.front.y ? 10 : -10), 'guest').setDepth(5);
     this.label = s.add.text(this.guest.x, this.guest.y - 26, CONFIG.guestName.toUpperCase(), {
-      fontFamily: 'monospace', fontSize: '11px', color: '#80ffdb', backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
-    }).setOrigin(0.5).setDepth(7);
+      fontFamily: FONT, fontSize: '12px', color: '#80ffdb', backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
+    }).setOrigin(0.5).setDepth(16);
     sfx.point();
     s.floatText(this.guest.x, this.guest.y - 40, 'Bhai, get me out of here!', '#80ffdb');
   }
@@ -57,8 +57,12 @@ export class RaidSystem {
       const dx = target.x - this.guest.x;
       const dy = target.y - this.guest.y;
       const d = Math.hypot(dx, dy);
-      if (d > 5) this.guest.setVelocity((dx / d) * 200, (dy / d) * 200);
-      else this.guest.setVelocity(0, 0);
+      if (d > 5) {
+        this.guest.setVelocity((dx / d) * 200, (dy / d) * 200).setRotation(Math.atan2(dy, dx));
+        if (!this.guest.anims.isPlaying) this.guest.play('guest-walk');
+      } else {
+        this.guest.setVelocity(0, 0).stop();
+      }
       this.label.setPosition(this.guest.x, this.guest.y - 26);
 
       if (Phaser.Math.Distance.Between(this.guest.x, this.guest.y, s.map.gate.x, s.map.gate.y) < 80) {

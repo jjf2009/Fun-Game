@@ -47,6 +47,17 @@ Open **`src/config.js`** and change:
 
 Story lines between nights are in `src/scenes/NightIntroScene.js`, and the angry-student yells are in `src/objects/Door.js`.
 
+## Art & credits
+
+All art is free to use:
+
+- **Character portraits**: [DiceBear "Pixel Art"](https://www.dicebear.com/styles/pixel-art/) (CC0, public domain), generated in `src/art/portraits.js`. Change the options there to restyle a face.
+- **In-game sprites, tiles, furniture**: pixel art generated in code in `src/art/pixels.js` (colors for each character are in `PEOPLE`).
+- **Fonts**: [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans) and [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) (SIL Open Font License), via Fontsource.
+- **Lighting**: night darkness, tube lights and the warden's torch are in `src/systems/Lighting.js`.
+
+Want real sprite packs? [Kenney.nl](https://kenney.nl/assets) has thousands of free CC0 assets (for example "Top-down Shooter" or "RPG Urban Pack"). Put the PNGs in `public/assets/` and load them in `src/scenes/BootScene.js`.
+
 ## Project layout
 
 ```
@@ -55,7 +66,8 @@ src/
   map.js               hostel layout (tile grid) + path finding
   scenes/              screens: Menu, NightIntro, Game, UI (HUD), Ragging, GameOver
   objects/             characters: Warden, Senior, Door (+ angry student), Npc (shared base)
-  systems/             Gang (bombs), Water, Raid (warden check), EventDirector (when events happen)
+  systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting
+  art/                 pixel-art generator + DiceBear portraits
   sfx.js               sound effects generated in code
 ```
 

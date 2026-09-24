@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONFIG, FONT } from '../config.js';
+import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { TILE, COLS, ROWS, T, ROOM_BLOCKS, buildMap, isWalkable, tileCenter, randomWalkableTile } from '../map.js';
 import { input } from '../controls.js';
 import { sfx } from '../sfx.js';
@@ -10,6 +10,7 @@ import { GangSystem } from '../systems/GangSystem.js';
 import { WaterSystem } from '../systems/WaterSystem.js';
 import { RaidSystem } from '../systems/RaidSystem.js';
 import { EventDirector } from '../systems/EventDirector.js';
+import { Lighting } from '../systems/Lighting.js';
 
 // One night in the hostel.
 export default class GameScene extends Phaser.Scene {
@@ -45,12 +46,16 @@ export default class GameScene extends Phaser.Scene {
 
     // Player starts in front of their own room
     this.player = this.physics.add.sprite(this.myDoor.frontTile.x, this.myDoor.frontTile.y, 'player').setDepth(6);
-    this.player.body.setCircle(13, 4, 4);
+    this.player.body.setCircle(13, 9, 9);
+    this.dust = this.add.particles(0, 0, 'dust', {
+      follow: this.player, frequency: 70, lifespan: 450, speed: { min: 5, max: 25 },
+      scale: { start: 0.7, end: 0.1 }, alpha: { start: 0.35, end: 0 }, emitting: false,
+    }).setDepth(4);
     this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, walls);
     this.youLabel = this.add.text(0, 0, 'YOU', {
-      fontFamily: FONT, fontSize: '11px', color: '#9bf6ff', backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
-    }).setOrigin(0.5).setDepth(7);
+      fontFamily: FONT, fontSize: '12px', color: '#9bf6ff', backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
+    }).setOrigin(0.5).setDepth(16);
 
     this.cameras.main.setBounds(0, 0, COLS * TILE, ROWS * TILE);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
@@ -70,8 +75,8 @@ export default class GameScene extends Phaser.Scene {
       const g = tileCenter(6, 14);
       this.guard = this.add.image(g.x, g.y, 'guard').setDepth(5);
       this.add.text(g.x, g.y - 26, 'SECURITY', {
-        fontFamily: FONT, fontSize: '11px', color: '#dee2e6', backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
-      }).setOrigin(0.5).setDepth(7);
+        fontFamily: FONT, fontSize: '12px', color: '#dee2e6', backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
+      }).setOrigin(0.5).setDepth(16);
     }
 
     // Systems
@@ -79,6 +84,7 @@ export default class GameScene extends Phaser.Scene {
     this.water = new WaterSystem(this);
     this.raid = new RaidSystem(this);
     this.director = new EventDirector(this);
+    this.lighting = new Lighting(this);
 
     // State
     this.timeLeft = CONFIG.nightLength;
@@ -102,89 +108,101 @@ export default class GameScene extends Phaser.Scene {
   // ---------- Map drawing ----------
 
   drawMap() {
-    const g = this.add.graphics().setDepth(0);
+    // The whole map is painted once onto one big canvas (fast to render every frame).
+    const W = COLS * TILE;
+    const H = ROWS * TILE;
+    if (this.textures.exists('mapbg')) this.textures.remove('mapbg');
+    const tex = this.textures.createCanvas('mapbg', W, H);
+    const ctx = tex.getContext();
+    ctx.imageSmoothingEnabled = false;
+    const tiles = this.registry.get('tiles');
+    const img = (key) => this.textures.get(key).getSourceImage();
     const grid = this.map.grid;
+    const pick = (arr, c, r) => arr[(c * 7 + r * 13) % arr.length];
+
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        const x = c * TILE;
-        const y = r * TILE;
-        const checker = (r + c) % 2 === 0;
+        let set;
         switch (grid[r][c]) {
-          case T.OUTSIDE: g.fillStyle(checker ? 0x1b2618 : 0x1d2a1a); break;
-          case T.COURTYARD: case T.BELL: g.fillStyle(checker ? 0x3a4a33 : 0x36452f); break;
-          case T.FLOOR: g.fillStyle(checker ? 0x7a738d : 0x716a84); break;
-          case T.BATH: g.fillStyle(checker ? 0x5b8ea6 : 0x52839a); break;
-          case T.ROOM: case T.DOOR: case T.MYDOOR: g.fillStyle(0x3f3346); break;
-          default: g.fillStyle(0x221d30);
+          case T.OUTSIDE: set = c >= 1 && c <= 2 ? tiles.road : tiles.outside; break;
+          case T.COURTYARD: case T.BELL: set = tiles.grass; break;
+          case T.FLOOR: set = tiles.floor; break;
+          case T.BATH: set = tiles.bath; break;
+          case T.ROOM: case T.DOOR: case T.MYDOOR: set = tiles.wood; break;
+          default: set = tiles.wall;
         }
-        g.fillRect(x, y, TILE, TILE);
+        ctx.drawImage(pick(set, c, r), c * TILE, r * TILE);
       }
     }
 
-    // Road outside
-    g.fillStyle(0x2b2b2b); g.fillRect(20, 0, 110, ROWS * TILE);
-    g.fillStyle(0xdddddd, 0.5);
-    for (let y = 10; y < ROWS * TILE; y += 60) g.fillRect(72, y, 6, 30);
+    // Road markings
+    ctx.fillStyle = 'rgba(230,230,230,0.55)';
+    for (let y = 10; y < H; y += 60) ctx.fillRect(TILE * 2 - 3, y, 6, 30);
 
-    // Rooms: outlines, beds and room numbers
+    // Rooms: walls, bed, desk, cupboard
     for (const [r0, r1] of ROOM_BLOCKS) {
       for (let i = 0; i < 8; i++) {
         const x = (13 + i * 3) * TILE;
         const y = r0 * TILE;
         const h = (r1 - r0 + 1) * TILE;
-        g.lineStyle(3, 0x1a1522); g.strokeRect(x, y, 3 * TILE, h);
-        g.fillStyle(0x5c4b6b); g.fillRect(x + 8, y + h / 2 - 14, 30, 28);   // bed
-        g.fillStyle(0xe9ecef, 0.8); g.fillRect(x + 10, y + h / 2 - 10, 10, 20); // pillow
-        g.fillStyle(0x6d597a); g.fillRect(x + 3 * TILE - 34, y + h / 2 - 10, 24, 20); // study table
+        const flip = i % 2 === 1;
+        ctx.drawImage(img('bed'), flip ? x + 3 * TILE - 40 : x + 8, y + h / 2 - 26);
+        ctx.drawImage(img('desk'), flip ? x + 8 : x + 3 * TILE - 32, y + 8);
+        ctx.drawImage(img('almirah'), flip ? x + 8 : x + 3 * TILE - 28, y + h - 40);
+        ctx.fillStyle = '#1a1522';
+        ctx.fillRect(x, y, 3 * TILE, 5); ctx.fillRect(x, y + h - 5, 3 * TILE, 5);
+        ctx.fillRect(x, y, 5, h); ctx.fillRect(x + 3 * TILE - 5, y, 5, h);
       }
     }
-    // Warden office blocks
-    g.fillStyle(0x2f2a3d); g.fillRect(11 * TILE, TILE, 2 * TILE, 5 * TILE);
-    g.fillRect(11 * TILE, 18 * TILE, 2 * TILE, 6 * TILE);
 
-    // Doors
+    // Warden office blocks
+    ctx.fillStyle = 'rgba(20,16,30,0.55)';
+    ctx.fillRect(11 * TILE, TILE, 2 * TILE, 5 * TILE);
+    ctx.fillRect(11 * TILE, 18 * TILE, 2 * TILE, 6 * TILE);
+    ctx.drawImage(img('desk'), 11 * TILE + 26, 2 * TILE);
+
+    // Doors (drawn on the room's edge facing the corridor)
     for (const d of this.map.doors) {
       const x = d.col * TILE;
       const y = d.row * TILE;
       const down = d.frontRow > d.row;
-      g.fillStyle(d.mine ? 0x2e86ab : 0x8b5a2b);
-      g.fillRect(x + 4, down ? y + TILE - 10 : y, TILE - 8, 10);
-      const label = d.mine ? `${d.roomNo}\nYOU` : `${d.roomNo}`;
-      this.add.text(x + TILE / 2, down ? y + 10 : y + TILE - 10, label, {
-        fontFamily: FONT, fontSize: '10px', color: d.mine ? '#9bf6ff' : '#d4c1a1', align: 'center',
+      ctx.drawImage(img(d.mine ? 'mydoor' : 'door'), x + 4, down ? y + TILE - 10 : y);
+      const label = d.mine ? `${d.roomNo} YOU` : `${d.roomNo}`;
+      this.add.text(x + TILE / 2, down ? y + TILE - 18 : y + 18, label, {
+        fontFamily: TITLE_FONT, fontSize: '8px', color: d.mine ? '#9bf6ff' : '#e8d5b7', stroke: '#000', strokeThickness: 3,
       }).setOrigin(0.5).setDepth(1);
     }
 
     // Boundary wall + gate
-    g.fillStyle(0x5a5a6e); g.fillRect(4 * TILE, 0, TILE, ROWS * TILE);
-    g.fillStyle(0x221d30); g.fillRect(4 * TILE, 11 * TILE, TILE, 3 * TILE);
-    g.lineStyle(3, 0x9d9d9d);
-    for (let y = 11 * TILE + 6; y < 14 * TILE; y += 10) g.lineBetween(4 * TILE + 4, y, 5 * TILE - 4, y);
-
-    // Alarm bell
-    const b = this.map.bell;
-    g.fillStyle(0x6c584c); g.fillRect(b.x - 3, b.y - 4, 6, 22);
-    g.fillStyle(0xf4d35e); g.fillTriangle(b.x - 12, b.y + 4, b.x + 12, b.y + 4, b.x, b.y - 14);
-    g.fillCircle(b.x, b.y + 5, 4);
+    ctx.fillStyle = '#5a5a6e'; ctx.fillRect(4 * TILE, 0, TILE, H);
+    ctx.fillStyle = '#6d6d85';
+    for (let y = 0; y < H; y += 20) ctx.fillRect(4 * TILE + ((y / 20) % 2) * 10, y, 18, 8);
+    ctx.fillStyle = '#26222f'; ctx.fillRect(4 * TILE, 11 * TILE, TILE, 3 * TILE);
+    ctx.fillStyle = '#9d9d9d';
+    for (let y = 11 * TILE + 4; y < 14 * TILE; y += 10) ctx.fillRect(4 * TILE + 3, y, TILE - 6, 3);
+    ctx.fillRect(4 * TILE + 18, 11 * TILE, 4, 3 * TILE);
 
     // Taps
-    g.fillStyle(0xadb5bd);
-    for (const r of [11, 12]) g.fillRect(39 * TILE - 12, r * TILE + 14, 16, 8);
+    for (const r of [11, 12]) ctx.drawImage(img('tap'), 39 * TILE - 14, r * TILE + 14);
 
-    // Corridor lights for a night-time feel
-    g.fillStyle(0xffe9a8, 0.05);
-    for (let c = 14; c < 38; c += 5) for (const r of [7, 17]) g.fillCircle(c * TILE, r * TILE, 80);
+    // Trees outside + in the courtyard corners
+    for (const [x, y] of [[0, 60], [0, 330], [0, 700], [100, 900], [210, 40], [360, 890]]) ctx.drawImage(img('tree'), x, y);
 
-    const label = (x, y, text, color = '#e0e0e0', size = 13) => this.add.text(x, y, text, {
-      fontFamily: FONT, fontSize: `${size}px`, color, stroke: '#000', strokeThickness: 3,
-    }).setOrigin(0.5).setDepth(1).setAlpha(0.85);
-    label(3 * TILE, 12.5 * TILE, 'MAIN\nGATE', '#cccccc', 11);
-    label(b.x + 30, b.y - 26, 'ALARM BELL', '#f4d35e', 11);
-    label(8 * TILE, 12.5 * TILE, 'COURTYARD');
-    label(38 * TILE, 9 * TILE, 'BATH\nROOM', '#caf0f8', 12);
-    label(12 * TILE, 3.5 * TILE, 'WARDEN\nOFFICE', '#aaaaaa', 11);
-    label(24.5 * TILE, 0.5 * TILE, CONFIG.hostelName.toUpperCase(), '#ffe066', 14);
-    label(2 * TILE, 1 * TILE, 'OUTSIDE', '#777777', 11);
+    tex.refresh();
+    this.add.image(0, 0, 'mapbg').setOrigin(0).setDepth(0);
+
+    this.add.image(this.map.bell.x, this.map.bell.y, 'bell').setDepth(2);
+
+    const label = (x, y, text, color = '#e0e0e0', size = 14) => this.add.text(x, y, text, {
+      fontFamily: FONT, fontSize: `${size}px`, color, stroke: '#000', strokeThickness: 4, align: 'center',
+    }).setOrigin(0.5).setDepth(16).setAlpha(0.9);
+    label(3 * TILE - 10, 12.5 * TILE, 'MAIN\nGATE', '#cccccc', 13);
+    label(this.map.bell.x + 34, this.map.bell.y - 28, 'ALARM BELL', '#f4d35e', 12);
+    label(8 * TILE, 12.5 * TILE, 'COURTYARD', '#b7e4c7');
+    label(38 * TILE, 9 * TILE, 'BATH\nROOM', '#caf0f8', 13);
+    label(12 * TILE, 3.5 * TILE, 'WARDEN\nOFFICE', '#aaaaaa', 12);
+    label(24.5 * TILE, 0.5 * TILE, CONFIG.hostelName.toUpperCase(), '#ffe066', 15);
+    label(2 * TILE, 1 * TILE, 'OUTSIDE', '#888888', 12);
   }
 
   // Invisible physics walls: every non-walkable tile, merged into horizontal strips.
@@ -225,6 +243,7 @@ export default class GameScene extends Phaser.Scene {
     this.water.update(dt, time);
     this.raid.update(dt);
     this.director.update(dt);
+    this.lighting.update(time);
 
     if (time - this.lastKnockAt > CONFIG.comboWindow * 1000) this.combo = 1;
     this.youLabel.setPosition(this.player.x, this.player.y - 26);
@@ -250,6 +269,15 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.player.setVelocity(vx * CONFIG.playerSpeed, vy * CONFIG.playerSpeed);
+    const moving = len > 0.1;
+    if (moving) {
+      this.player.setRotation(Phaser.Math.Angle.RotateTo(this.player.rotation, Math.atan2(vy, vx), 0.25));
+      if (!this.player.anims.isPlaying) this.player.play('player-walk');
+    } else if (this.player.anims.isPlaying) {
+      this.player.stop();
+      this.player.setTexture('player');
+    }
+    this.dust.emitting = moving;
     this.updateHint();
     if (action) this.handleAction(time);
   }
@@ -301,6 +329,8 @@ export default class GameScene extends Phaser.Scene {
     this.hidden = true;
     this.hideUntil = time + CONFIG.hideMax * 1000;
     this.player.setPosition(this.myDoor.front.x, this.myDoor.front.y).setAlpha(0.25);
+    this.player.stop();
+    this.dust.emitting = false;
     this.floatText(this.player.x, this.player.y - 30, 'Zzz... (hiding)', '#9bf6ff');
     this.hint = 'Hiding... move to come out';
   }

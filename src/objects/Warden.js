@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Npc } from './Npc.js';
-import { CONFIG } from '../config.js';
+import { CONFIG, FONT } from '../config.js';
 import { tileCenter, hasLineOfSight } from '../map.js';
 import { sfx } from '../sfx.js';
 
@@ -21,8 +21,8 @@ export class Warden extends Npc {
     this.target = null;
     this.cone = scene.add.graphics().setDepth(3);
     this.alert = scene.add.text(x, y, '!', {
-      fontFamily: 'monospace', fontSize: '26px', color: '#ff4d4d', stroke: '#000', strokeThickness: 4, fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(9).setVisible(false);
+      fontFamily: FONT, fontSize: '28px', color: '#ff4d4d', stroke: '#000', strokeThickness: 4, fontStyle: 'bold',
+    }).setOrigin(0.5).setDepth(17).setVisible(false);
     this.pickPatrol();
   }
 
@@ -99,7 +99,7 @@ export class Warden extends Npc {
   drawCone(range) {
     const chasing = this.state === 'chase';
     this.cone.clear();
-    this.cone.fillStyle(chasing ? 0xff5555 : 0xfff1a8, chasing ? 0.22 : 0.16);
+    this.cone.fillStyle(chasing ? 0xff5555 : 0xfff1a8, chasing ? 0.2 : 0.1);
     this.cone.slice(this.x, this.y, range, this.facing - HALF_CONE, this.facing + HALF_CONE, false);
     this.cone.fillPath();
   }

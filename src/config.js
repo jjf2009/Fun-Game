@@ -37,4 +37,5 @@ export const CONFIG = {
   waterCutDuration: 25,
 };
 
-export const FONT = 'monospace';
+export const FONT = '"Pixelify Sans", monospace';       // pixel font for normal text
+export const TITLE_FONT = '"Press Start 2P", monospace'; // chunky arcade font for titles

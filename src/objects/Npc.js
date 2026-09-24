@@ -10,25 +10,32 @@ export class Npc extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setDepth(5);
+    this.baseKey = key;
     this.path = [];
     this.repathAt = 0;
     this.facing = 0;
     this.label = scene.add
       .text(x, y - 26, label, {
-        fontFamily: FONT, fontSize: '11px', color: labelColor,
+        fontFamily: FONT, fontSize: '12px', color: labelColor,
         backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
       })
       .setOrigin(0.5)
-      .setDepth(7);
+      .setDepth(16);
   }
 
   preUpdate(time, delta) {
     super.preUpdate(time, delta);
     this.label.setPosition(this.x, this.y - 26);
     const { x: vx, y: vy } = this.body.velocity;
-    if (Math.abs(vx) + Math.abs(vy) > 5) {
+    const moving = Math.abs(vx) + Math.abs(vy) > 5;
+    if (moving) {
       this.facing = Phaser.Math.Angle.RotateTo(this.facing, Math.atan2(vy, vx), 0.15);
+      if (!this.anims.isPlaying) this.play(`${this.baseKey}-walk`);
+    } else if (this.anims.isPlaying) {
+      this.stop();
+      this.setTexture(this.baseKey);
     }
+    this.setRotation(this.facing);
   }
 
   setPathTo(x, y) {
