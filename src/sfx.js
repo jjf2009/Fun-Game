@@ -78,6 +78,18 @@ export const sfx = {
   splash() { noise(0.25, 0.12); },
   tick() { tone(1200, 0.03, { vol: 0.04 }); },
   note(i) { tone([392, 440, 494, 523][i % 4], 0.15, { type: 'triangle', vol: 0.12 }); },
+  engine() {
+    tone(55, 0.9, { type: 'sawtooth', vol: 0.07, slideTo: 110 });
+    tone(58, 0.9, { type: 'square', vol: 0.03, slideTo: 95, delay: 0.05 });
+  },
+  camera() {
+    noise(0.08, 0.2);
+    tone(2400, 0.05, { type: 'square', vol: 0.04, delay: 0.05 });
+  },
+  stamp() {
+    tone(120, 0.25, { type: 'sine', vol: 0.4, slideTo: 50 });
+    noise(0.15, 0.25);
+  },
   win() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.18, { vol: 0.06, delay: i * 0.12 })); },
   fail() { [400, 300, 200].forEach((f, i) => tone(f, 0.2, { type: 'sawtooth', vol: 0.06, delay: i * 0.15 })); },
 };

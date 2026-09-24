@@ -11,6 +11,7 @@ import { WaterSystem } from '../systems/WaterSystem.js';
 import { RaidSystem } from '../systems/RaidSystem.js';
 import { EventDirector } from '../systems/EventDirector.js';
 import { Lighting } from '../systems/Lighting.js';
+import { BossFight } from '../systems/BossFight.js';
 
 // One night in the hostel.
 export default class GameScene extends Phaser.Scene {
@@ -24,6 +25,7 @@ export default class GameScene extends Phaser.Scene {
     this.lives = data.lives ?? CONFIG.lives;
     this.knocks = data.knocks ?? 0;
     this.era = this.night <= CONFIG.oldDaysNights ? 'old' : 'security';
+    this.bossNight = this.night === CONFIG.bossNight;
   }
 
   create() {
@@ -65,13 +67,20 @@ export default class GameScene extends Phaser.Scene {
     const lobby = tileCenter(11, 12);
     this.warden = new Warden(this, lobby.x, lobby.y);
     this.seniors = [];
-    const seniorCount = this.era === 'old' ? Math.min(1 + Math.floor(this.night / 2), 3) : (Math.random() < 0.4 ? 1 : 0);
+    let seniorCount = this.era === 'old' ? Math.min(1 + Math.floor(this.night / 2), 3) : (Math.random() < 0.4 ? 1 : 0);
+    if (this.bossNight) {
+      // On Boss Night the warden sits at the Anti-Ragging Cell desk, and there are no seniors.
+      seniorCount = 0;
+      const desk = tileCenter(11, 6);
+      this.warden.setPosition(desk.x - 10, desk.y + 4);
+      this.warden.station();
+    }
     for (let i = 0; i < seniorCount; i++) {
       const t = randomWalkableTile((c) => c > 14 && Math.abs(c - this.myDoor.col) > 6);
       const c = tileCenter(t.col, t.row);
       this.seniors.push(new Senior(this, c.x, c.y));
     }
-    if (this.era === 'security') {
+    if (this.era === 'security' && !this.bossNight) {
       const g = tileCenter(6, 14);
       this.guard = this.add.image(g.x, g.y, 'guard').setDepth(5);
       this.add.text(g.x, g.y - 26, 'SECURITY', {
@@ -85,6 +94,7 @@ export default class GameScene extends Phaser.Scene {
     this.raid = new RaidSystem(this);
     this.director = new EventDirector(this);
     this.lighting = new Lighting(this);
+    this.bossFight = this.bossNight ? new BossFight(this) : null;
 
     // State
     this.timeLeft = CONFIG.nightLength;
@@ -102,7 +112,12 @@ export default class GameScene extends Phaser.Scene {
     input.reset();
 
     this.scene.launch('UI');
-    this.time.delayedCall(600, () => this.banner(`NIGHT ${this.night} - Knock on doors and RUN! Survive till morning.`, '#ffe066'));
+    if (this.bossNight) {
+      this.time.delayedCall(600, () => this.banner(`🏍️ BOSS NIGHT! ${CONFIG.bossName}'s gang is here on 3 bikes!`, '#ff6b6b'));
+      this.time.delayedCall(3800, () => this.banner('📸 Photograph them when they stop, then file complaints at the ANTI-RAGGING CELL!', '#80ffdb'));
+    } else {
+      this.time.delayedCall(600, () => this.banner(`NIGHT ${this.night} - Knock on doors and RUN! Survive till morning.`, '#ffe066'));
+    }
   }
 
   // ---------- Map drawing ----------
@@ -229,10 +244,12 @@ export default class GameScene extends Phaser.Scene {
     if (this.over) return;
     const dt = delta / 1000;
 
-    this.timeLeft -= dt;
-    if (this.timeLeft <= 0) {
-      this.nightComplete();
-      return;
+    if (!this.bossNight) {
+      this.timeLeft -= dt;
+      if (this.timeLeft <= 0) {
+        this.nightComplete();
+        return;
+      }
     }
 
     this.updatePlayer(time);
@@ -240,9 +257,13 @@ export default class GameScene extends Phaser.Scene {
     this.warden.update(time);
     for (const s of this.seniors) s.update(time);
     this.gang.update(dt);
-    this.water.update(dt, time);
     this.raid.update(dt);
-    this.director.update(dt);
+    if (this.bossFight) {
+      this.bossFight.update(time, dt);
+    } else {
+      this.water.update(dt, time);
+      this.director.update(dt);
+    }
     this.lighting.update(time);
 
     if (time - this.lastKnockAt > CONFIG.comboWindow * 1000) this.combo = 1;
@@ -297,6 +318,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   updateHint() {
+    const bossHint = this.bossFight?.hint();
+    if (bossHint) {
+      this.hint = bossHint;
+      return;
+    }
     const door = this.nearestDoor();
     if (this.near(this.map.bell, 60)) this.hint = 'Ring the alarm bell';
     else if (this.near(this.myDoor.front, 50)) {
@@ -307,6 +333,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   handleAction(time) {
+    if (this.bossFight?.action(time)) return;
     if (this.near(this.map.bell, 60)) {
       this.gang.ringBell();
       return;
@@ -375,6 +402,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.over || this.time.now < this.invulnUntil) return false;
     this.lives--;
     this.invulnUntil = this.time.now + 2000;
+    this.bossFight?.dropPhotos();
     sfx.hurt();
     this.cameras.main.shake(200, 0.01);
     this.cameras.main.flash(200, 255, 60, 60);
@@ -430,6 +458,18 @@ export default class GameScene extends Phaser.Scene {
         lives: Math.min(this.lives + 1, CONFIG.lives),
         knocks: this.knocks,
       });
+    });
+  }
+
+  victory() {
+    if (this.over) return;
+    this.over = true;
+    this.physics.pause();
+    sfx.win();
+    this.cameras.main.flash(1000, 255, 240, 200);
+    this.time.delayedCall(1200, () => {
+      this.scene.stop('UI');
+      this.scene.start('Victory', { score: this.score, knocks: this.knocks, lives: this.lives });
     });
   }
 

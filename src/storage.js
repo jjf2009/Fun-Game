@@ -19,3 +19,22 @@ export function saveBest(score) {
   }
   return true;
 }
+
+// Remembers that the player has reached Boss Night, so the menu can offer a replay button.
+const BOSS_KEY = 'hostelNights.bossUnlocked';
+
+export function isBossUnlocked() {
+  try {
+    return localStorage.getItem(BOSS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function unlockBoss() {
+  try {
+    localStorage.setItem(BOSS_KEY, '1');
+  } catch {
+    // ignore
+  }
+}

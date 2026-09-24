@@ -1,7 +1,7 @@
 {
-  "name": "hostel-nights",
+  "name": "gec-hostel-nights",
   "version": "1.0.0",
-  "description": "Hostel Nights - a top-down browser game about college hostel life",
+  "description": "GEC Hostel Nights - a top-down browser game about college hostel life",
   "private": true,
   "type": "module",
   "scripts": {

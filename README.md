@@ -1,4 +1,4 @@
-# 🌙 Hostel Nights
+# 🌙 GEC Hostel Nights
 
 A top-down browser game about college hostel life. Knock on doors at 2 AM and run, dodge the warden's flashlight, sneak your non-hosteller friend out during a surprise check, survive the outsider gang's bomb attacks, escape the seniors, and stay fresh through the water cuts.
 
@@ -17,6 +17,17 @@ Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 | 🛏️ **Hide** | Press ACT at your own door to hide for a few seconds. |
 
 Each night runs from 11 PM to 5 AM (~2.5 minutes). Survive to earn a bonus and one life back. From Night 4, **security arrives**: fewer gang attacks and fewer seniors, but a stricter warden.
+
+### 🏍️ Boss Night (Night 5, the finale)
+
+The outsider gang's leader **Bike Bhai** arrives with his gang on **3 bikes, triple seat**, and bombs the hostel.
+
+1. When a bike **stops** at the wall, get close and press SPACE/ACT to **take a photo** (proof).
+2. Run to the **ANTI-RAGGING CELL** desk (by the Warden Office) and **file a complaint**.
+3. 2 photos suspend each henchman bike, and 3 suspend Bike Bhai. Getting hit breaks your phone, so you lose any photos you haven't filed!
+4. Once both henchman bikes are suspended, Bike Bhai gets **furious**. Get him suspended and **you save the hostel**!
+
+After you reach Boss Night once, the menu has a **BOSS NIGHT** button so you can replay it.
 
 ## Run it on your computer
 
@@ -43,6 +54,7 @@ Open **`src/config.js`** and change:
 - `wardenName`: what everyone calls the warden
 - `guestName`: your non-hosteller friend
 - `myRoom`: your room number
+- `bossNight`, `bossName`: which night is the finale and the gang leader's name
 - numbers such as `nightLength`, `lives`, and speeds to make it easier or harder
 
 Story lines between nights are in `src/scenes/NightIntroScene.js`, and the angry-student yells are in `src/objects/Door.js`.

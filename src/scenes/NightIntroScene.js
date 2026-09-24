@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
+import { sfx } from '../sfx.js';
+import { unlockBoss } from '../storage.js';
 
 const FLAVOR = {
   old: [
@@ -34,6 +36,10 @@ export default class NightIntroScene extends Phaser.Scene {
     const bg = this.add.graphics();
     bg.fillGradientStyle(0x0b0d1f, 0x0b0d1f, 0x2a1f4a, 0x2a1f4a, 1);
     bg.fillRect(0, 0, 960, 540);
+    if (night === CONFIG.bossNight) {
+      this.bossCard();
+      return;
+    }
     this.add.text(480, 110, `NIGHT ${night}`, {
       fontFamily: TITLE_FONT, fontSize: '52px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 10,
     }).setOrigin(0.5).setShadow(4, 4, '#000', 0, true, true);
@@ -64,6 +70,57 @@ export default class NightIntroScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.tweens.add({ targets: tap, alpha: 0.3, duration: 600, yoyo: true, repeat: -1 });
 
+    this.waitForStart();
+  }
+
+  // The finale: the outsider gang's boss arrives on 3 bikes.
+  bossCard() {
+    unlockBoss();
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x3a0610, 0x3a0610, 0x0b0d1f, 0x0b0d1f, 1);
+    bg.fillRect(0, 0, 960, 540);
+    this.time.delayedCall(300, () => sfx.engine());
+
+    this.add.text(480, 60, 'BOSS NIGHT', {
+      fontFamily: TITLE_FONT, fontSize: '48px', color: '#ff4d6d', stroke: '#2a0008', strokeThickness: 10,
+    }).setOrigin(0.5).setShadow(4, 4, '#000', 0, true, true);
+
+    this.add.rectangle(200, 250, 190, 190, 0x1d1a2b).setStrokeStyle(4, 0xffd700);
+    const face = this.add.image(200, 250, 'face_boss').setScale(0.92);
+    this.tweens.add({ targets: face, angle: { from: -2, to: 2 }, duration: 500, yoyo: true, repeat: -1 });
+    this.add.text(200, 365, CONFIG.bossName, { fontFamily: TITLE_FONT, fontSize: '16px', color: '#ffd700', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5);
+    this.add.text(200, 390, 'Leader of the outsider gang', { fontFamily: FONT, fontSize: '15px', color: '#adb5bd' }).setOrigin(0.5);
+
+    const story = [
+      `"They're back... ${CONFIG.bossName} and his gang,`,
+      '3 bikes, TRIPLE SEAT, bombs in their pockets.',
+      'Tonight they want to blow up the hostel."',
+      '',
+      '📸  Photograph each bike when it stops at the wall',
+      '📝  File anti-ragging complaints at the ANTI-RAGGING CELL',
+      '⛔  Get all 3 bikes SUSPENDED to save the hostel!',
+    ];
+    this.add.text(330, 150, story.join('\n'), {
+      fontFamily: FONT, fontSize: '19px', color: '#ffffff', lineSpacing: 8, stroke: '#000', strokeThickness: 3,
+    });
+
+    // the three bikes rolling across the bottom
+    ['bike', 'bike_boss', 'bike'].forEach((key, i) => {
+      const b = this.add.image(-100 - i * 150, 430, key).setScale(key === 'bike_boss' ? 2.2 : 2);
+      this.tweens.add({ targets: b, x: 1100 - i * 150, duration: 4200, repeat: -1, delay: i * 150 });
+    });
+
+    this.add.text(480, 505, `Score: ${this.data_.score}   Lives: ${'♥'.repeat(this.data_.lives)}`, {
+      fontFamily: FONT, fontSize: '16px', color: '#80ffdb',
+    }).setOrigin(0.5);
+    const tap = this.add.text(480, 480, this.sys.game.device.input.touch ? 'Tap to face them' : 'Press SPACE to face them', {
+      fontFamily: FONT, fontSize: '20px', color: '#ffd166',
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: tap, alpha: 0.3, duration: 600, yoyo: true, repeat: -1 });
+    this.waitForStart();
+  }
+
+  waitForStart() {
     this.cameras.main.fadeIn(400);
     this.started = false;
     const go = () => {

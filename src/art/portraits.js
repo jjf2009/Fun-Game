@@ -18,6 +18,11 @@ export const PORTRAITS = {
     seed: 'gang', hair: ['short20'], hairColor: ['28150a'], clothingColor: ['ae0001'], skinColor: ['a26d3d'], mouth: ['sad07'],
     glasses: ['dark05'], glassesProbability: 100, beard: ['variant06'], beardProbability: 100, hat: ['variant07'], hatColor: ['2e1e05'], hatProbability: 100,
   },
+  face_boss: {
+    seed: 'bikebhai', hair: ['short24'], hairColor: ['28150a'], clothingColor: ['03396c'], skinColor: ['b68655'], mouth: ['happy12'],
+    glasses: ['dark07'], glassesProbability: 100, beard: ['variant04'], beardProbability: 100, hat: ['variant08'], hatColor: ['a62116'], hatProbability: 100,
+    accessories: ['variant04'], accessoriesColor: ['ffd700'], accessoriesProbability: 100,
+  },
   face_student: { seed: 'student', hair: ['short13'], hairColor: ['603015'], clothingColor: ['ffc425'], skinColor: ['f5cfa0'], mouth: ['sad01'], glasses: ['light05'], glassesProbability: 100, beardProbability: 0, hatProbability: 0 },
 };
 
