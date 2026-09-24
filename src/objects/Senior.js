@@ -24,7 +24,8 @@ export class Senior extends Npc {
     const wanderSpeed = 60 + n * 4;
     const chaseSpeed = Math.min(120 + n * 6, 160);
 
-    const canSee = !s.hidden && time > this.cooldownUntil && this.distTo(p) < 150
+    const onBreak = time < s.seniorBreakUntil;
+    const canSee = !s.hidden && !onBreak && time > this.cooldownUntil && this.distTo(p) < 150
       && hasLineOfSight(this.x, this.y, p.x, p.y);
     if (canSee) {
       if (this.state !== 'chase') s.floatText(this.x, this.y - 40, 'OYE FRESHER! COME HERE!', '#ff8fa3');
@@ -33,12 +34,12 @@ export class Senior extends Npc {
     }
 
     if (this.state === 'chase') {
-      if (s.hidden || time - this.lastSeen > 2500) {
+      if (s.hidden || onBreak || time - this.lastSeen > 2500) {
         this.state = 'wander';
         this.wander();
       } else {
         this.chase(p, chaseSpeed, time);
-        if (this.distTo(p) < 26 && time > s.invulnUntil) s.startRagging(this);
+        if (this.distTo(p) < 26 && time > s.invulnUntil && time > s.seniorBreakUntil) s.startRagging(this);
       }
     } else if (this.moveAlong(wanderSpeed)) {
       this.wander();

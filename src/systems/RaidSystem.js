@@ -8,13 +8,15 @@ export class RaidSystem {
   constructor(scene) {
     this.scene = scene;
     this.active = false;
+    this.used = false; // Bunty only sneaks in once per night
     this.guest = null;
   }
 
   start() {
     const s = this.scene;
     const duration = Math.min(CONFIG.raidDuration, s.timeLeft - 3);
-    if (duration < 12) return false;
+    if (duration < 12 || this.used) return false;
+    this.used = true;
     this.active = true;
     this.timeLeft = duration;
     this.state = 'inRoom';

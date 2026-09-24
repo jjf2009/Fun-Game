@@ -16,8 +16,11 @@ export const CONFIG = {
 
   // ---- Player ----
   playerSpeed: 175,
-  hideMax: 7,                    // seconds you can hide in your room
-  hideCooldown: 8,
+  hideMax: 7,                    // seconds you can stay in a hiding spot
+  hideReentry: 2,                // seconds before you can re-enter the same hiding spot
+
+  // ---- Seniors ----
+  seniorBreak: 12,               // after a ragging task, ALL seniors leave you alone this long (seconds)
 
   // ---- Knock & run ----
   knockPoints: 10,

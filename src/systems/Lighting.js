@@ -33,7 +33,7 @@ export class Lighting {
   }
 
   flash(x, y, r, duration) {
-    this.flashes.push({ x, y, r, start: this.scene.time.now, duration });
+    this.flashes.push({ x, y, r, start: this.scene.game.loop.time, duration });
   }
 
   update(time) {

@@ -102,7 +102,8 @@ export default class GameScene extends Phaser.Scene {
     this.lastKnockAt = -99999;
     this.invulnUntil = 0;
     this.hidden = false;
-    this.canHideAt = 0;
+    this.seniorBreakUntil = 0;
+    this.hideSpots = this.makeHideSpots();
     this.inRagging = false;
     this.over = false;
     this.hint = '';
@@ -118,6 +119,12 @@ export default class GameScene extends Phaser.Scene {
     } else {
       this.time.delayedCall(600, () => this.banner(`NIGHT ${this.night} - Knock on doors and RUN! Survive till morning.`, '#ffe066'));
     }
+  }
+
+  // Real game time in ms. (The scene clock, this.time.now, freezes while the scene is
+  // paused for a ragging task, so it is stale right after resuming. Don't use it for timers.)
+  get now() {
+    return this.game.loop.time;
   }
 
   // ---------- Map drawing ----------
@@ -199,6 +206,10 @@ export default class GameScene extends Phaser.Scene {
 
     // Taps
     for (const r of [11, 12]) ctx.drawImage(img('tap'), 39 * TILE - 14, r * TILE + 14);
+    // Bathroom stall (second hiding spot)
+    ctx.fillStyle = '#2a9d8f'; ctx.fillRect(39 * TILE - 2, 15 * TILE + 2, 10, TILE - 4);
+    ctx.fillStyle = '#1d6f65'; ctx.fillRect(39 * TILE - 2, 15 * TILE + 2, 3, TILE - 4);
+    ctx.fillStyle = '#ffd166'; ctx.fillRect(39 * TILE + 3, 15.5 * TILE - 2, 3, 4);
 
     // Trees outside + in the courtyard corners
     for (const [x, y] of [[0, 60], [0, 330], [0, 700], [100, 900], [210, 40], [360, 890]]) ctx.drawImage(img('tree'), x, y);
@@ -215,6 +226,7 @@ export default class GameScene extends Phaser.Scene {
     label(this.map.bell.x + 34, this.map.bell.y - 28, 'ALARM BELL', '#f4d35e', 12);
     label(8 * TILE, 12.5 * TILE, 'COURTYARD', '#b7e4c7');
     label(38 * TILE, 9 * TILE, 'BATH\nROOM', '#caf0f8', 13);
+    label(38 * TILE - 4, 14.4 * TILE, 'STALL\n(hide)', '#9bf6ff', 11);
     label(12 * TILE, 3.5 * TILE, 'WARDEN\nOFFICE', '#aaaaaa', 12);
     label(24.5 * TILE, 0.5 * TILE, CONFIG.hostelName.toUpperCase(), '#ffe066', 15);
     label(2 * TILE, 1 * TILE, 'OUTSIDE', '#888888', 12);
@@ -285,6 +297,7 @@ export default class GameScene extends Phaser.Scene {
 
     if (this.hidden) {
       this.player.setVelocity(0, 0);
+      this.hint = `Hiding in ${this.hideSpot.name}: ${Math.ceil((this.hideUntil - time) / 1000)}s (move to come out)`;
       if (len > 0.3 || action || time > this.hideUntil) this.unhide(time, time > this.hideUntil);
       return;
     }
@@ -325,8 +338,10 @@ export default class GameScene extends Phaser.Scene {
     }
     const door = this.nearestDoor();
     if (this.near(this.map.bell, 60)) this.hint = 'Ring the alarm bell';
-    else if (this.near(this.myDoor.front, 50)) {
-      this.hint = this.raid.state === 'inRoom' && this.raid.active ? `Get ${CONFIG.guestName} out!` : 'Hide in your room';
+    else if (this.nearHideSpot()) {
+      const spot = this.nearHideSpot();
+      if (spot.room && this.raid.active && this.raid.state === 'inRoom') this.hint = `Get ${CONFIG.guestName} out!`;
+      else this.hint = this.now < spot.readyAt ? '' : `Hide in ${spot.name}`;
     } else if (door) this.hint = door.state === 'idle' ? `Knock on room ${door.roomNo}` : '';
     else if (this.water.nearTap()) this.hint = this.water.cut ? 'No water! 😩' : 'Freshening up...';
     else this.hint = '';
@@ -338,9 +353,10 @@ export default class GameScene extends Phaser.Scene {
       this.gang.ringBell();
       return;
     }
-    if (this.near(this.myDoor.front, 50)) {
-      if (this.raid.active && this.raid.state === 'inRoom') this.raid.releaseGuest();
-      else this.hide(time);
+    const spot = this.nearHideSpot();
+    if (spot) {
+      if (spot.room && this.raid.active && this.raid.state === 'inRoom') this.raid.releaseGuest();
+      else this.hide(time, spot);
       return;
     }
     this.nearestDoor()?.knock(time);
@@ -348,31 +364,49 @@ export default class GameScene extends Phaser.Scene {
 
   // ---------- Hiding ----------
 
-  hide(time) {
-    if (time < this.canHideAt) {
-      this.floatText(this.player.x, this.player.y - 30, 'Roommate locked the door!', '#aaaaaa', 12);
-      return;
-    }
+  // Two hiding spots: your own room and the bathroom stall. Both are always available.
+  makeHideSpots() {
+    return [
+      {
+        name: 'your room', room: true, readyAt: 0,
+        front: this.myDoor.front, stand: this.myDoor.frontTile,
+        kickMsg: 'Roommate: "Get out, I\'m sleeping!"',
+      },
+      {
+        name: 'the bathroom stall', room: false, readyAt: 0,
+        front: { x: 39 * TILE, y: 15.5 * TILE }, stand: tileCenter(38, 15),
+        kickMsg: 'Someone is banging on the stall door!',
+      },
+    ];
+  }
+
+  nearHideSpot() {
+    return this.hideSpots.find((spot) => this.near(spot.front, 50)) ?? null;
+  }
+
+  hide(time, spot) {
+    if (time < spot.readyAt) return;
     this.hidden = true;
+    this.hideSpot = spot;
     this.hideUntil = time + CONFIG.hideMax * 1000;
-    this.player.setPosition(this.myDoor.front.x, this.myDoor.front.y).setAlpha(0.25);
+    this.player.setPosition(spot.front.x, spot.front.y).setAlpha(0.25);
     this.player.stop();
     this.dust.emitting = false;
-    this.floatText(this.player.x, this.player.y - 30, 'Zzz... (hiding)', '#9bf6ff');
-    this.hint = 'Hiding... move to come out';
+    this.floatText(this.player.x, this.player.y - 30, spot.room ? 'Zzz... (hiding)' : 'Shh... (hiding)', '#9bf6ff');
   }
 
   unhide(time, kickedOut) {
+    const spot = this.hideSpot;
     this.hidden = false;
-    this.canHideAt = time + CONFIG.hideCooldown * 1000;
-    this.player.setPosition(this.myDoor.frontTile.x, this.myDoor.frontTile.y).setAlpha(1);
-    if (kickedOut) this.floatText(this.player.x, this.player.y - 30, 'Roommate: "Get out, I\'m sleeping!"', '#ffffff', 12);
+    spot.readyAt = time + CONFIG.hideReentry * 1000;
+    this.player.setPosition(spot.stand.x, spot.stand.y).setAlpha(1);
+    if (kickedOut) this.floatText(this.player.x, this.player.y - 30, spot.kickMsg, '#ffffff', 12);
   }
 
   // ---------- Scoring & feedback ----------
 
   onKnock(door) {
-    const now = this.time.now;
+    const now = this.now;
     this.combo = now - this.lastKnockAt < CONFIG.comboWindow * 1000 ? Math.min(this.combo + 1, 5) : 1;
     this.lastKnockAt = now;
     this.knocks++;
@@ -399,9 +433,9 @@ export default class GameScene extends Phaser.Scene {
 
   // Returns true if the player actually lost a life.
   hurt(reason) {
-    if (this.over || this.time.now < this.invulnUntil) return false;
+    if (this.over || this.now < this.invulnUntil) return false;
     this.lives--;
-    this.invulnUntil = this.time.now + 2000;
+    this.invulnUntil = this.now + 2000;
     this.bossFight?.dropPhotos();
     sfx.hurt();
     this.cameras.main.shake(200, 0.01);
@@ -428,8 +462,10 @@ export default class GameScene extends Phaser.Scene {
         this.input.keyboard.resetKeys();
         input.reset();
         this.inRagging = false;
-        const now = this.time.now;
-        senior.letGo(now);
+        const now = this.now;
+        // Senior break: every senior leaves you alone for a while, so two seniors can't chain-rag you.
+        this.seniorBreakUntil = now + CONFIG.seniorBreak * 1000;
+        for (const s of this.seniors) s.letGo(now);
         if (success) {
           this.invulnUntil = now + 1500;
           this.addScore(30, 'Survived the senior!');

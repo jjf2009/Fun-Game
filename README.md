@@ -18,11 +18,11 @@ Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 |---|---|
 | 🚪 **Knock & run** | Press **SPACE** (or **ACT**) near a door. It opens in ~2 seconds, so RUN. Knock quickly one after another for a combo (up to x5). |
 | 🔦 **Warden** | Patrols with a flashlight. If you step into the light, the warden chases you. Break line of sight or hide in your room. |
-| 🚨 **Warden check** | Your friend is in your room! Go to your door, press ACT, and lead them to the **main gate** without the flashlight seeing them. |
+| 🚨 **Warden check** | Once per night, your friend Bunty is in your room! Go to your door, press ACT, and lead them to the **main gate** without the flashlight seeing them. |
 | 💣 **Outsider gang** | They throw bombs over the wall. Red circles show where each one will land. Ring the **alarm bell** by the gate to scare them off. |
-| 😈 **Seniors** | Roam in the Old Days (Nights 1–3). If one catches you, do their silly task (push-ups, anthem, intro) fast or lose a life. |
+| 😈 **Seniors** | Roam in the Old Days (Nights 1–3). If one catches you, do their silly task (push-ups, anthem, intro) fast or lose a life. Afterwards **all** seniors leave you alone for 12 seconds. |
 | 🚿 **Freshness** | Drains over time. Refill at the bathroom taps. During a **water cut**, find the water bucket. |
-| 🛏️ **Hide** | Press ACT at your own door to hide for a few seconds. |
+| 🛏️ **Hide** | Two hiding spots, always available: **your room** and the **bathroom stall**. Press ACT there to hide for up to 7 seconds. |
 
 Each night runs from 11 PM to 5 AM (~2.5 minutes). Survive to earn a bonus and one life back. From Night 4, **security arrives**: fewer gang attacks and fewer seniors, but a stricter warden.
 

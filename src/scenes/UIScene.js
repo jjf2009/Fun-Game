@@ -145,6 +145,8 @@ export default class UIScene extends Phaser.Scene {
       status.push(g.raid.state === 'inRoom' ? `Get ${CONFIG.guestName} out of room ${CONFIG.myRoom}` : `Take ${CONFIG.guestName} to the MAIN GATE`);
     }
     if (g.gang.active) status.push('💣 GANG ATTACK: ring the bell at the gate');
+    const breakLeft = Math.ceil((g.seniorBreakUntil - g.now) / 1000);
+    if (breakLeft > 0 && g.seniors.length) status.push(`😇 Seniors off your back: ${breakLeft}s`);
     if (g.water.cut) status.push(`🚱 WATER CUT ${Math.ceil(g.water.timeLeft)}s`);
     if (g.water.freshness < 30 && !g.water.cut) status.push('Freshness low! Go to the bathroom');
     this.statusText.setText(status.join('\n'));

@@ -29,7 +29,7 @@ export class BossFight {
       fontFamily: FONT, fontSize: '13px', color: '#000', backgroundColor: '#80ffdb', padding: { x: 4, y: 2 },
     }).setOrigin(0.5).setDepth(17);
 
-    const start = scene.time.now + 1500;
+    const start = scene.game.loop.time + 1500;
     for (const bk of this.bikes) {
       bk.sprite = scene.add.image(bk.lane, -80, bk.key).setDepth(6).setRotation(Math.PI / 2).setScale(bk.boss ? 1.6 : 1.4);
       bk.label = scene.add.text(bk.lane, -80, bk.name, {
