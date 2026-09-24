@@ -73,6 +73,7 @@ export const PEOPLE = {
   student: { shirt: '#f77f00', skin: '#f1c27d', hair: '#3b2414', towel: true },
   guest: { shirt: '#2a9d8f', skin: '#e0ac69', hair: '#2b1b12', cap: '#e9c46a' },
   guard: { shirt: '#6c757d', skin: '#c68642', hair: '#111111', cap: '#343a40', size: 1.05 },
+  boss: { shirt: '#1b1b1b', skin: '#c68642', hair: '#111111', bandana: '#e63946', shades: true, chain: '#ffd700', size: 1.15 },
 };
 
 // frame: 0 = standing, 1 / 2 = walking (arms swing)
@@ -110,7 +111,39 @@ export function personCanvas(p, frame) {
     }
     if (p.bandana) for (let y = -3; y <= 3; y++) { set(cx + 2, cy + y, p.bandana); set(cx - 3, cy + (y > 0 ? 1 : 0), p.bandana); }
     if (p.shades) for (let y = -2; y <= 2; y++) set(cx + 5, cy + y, '#000000');
+    if (p.chain) for (let y = -3; y <= 3; y++) set(cx + 3, cy + y + (Math.abs(y) > 2 ? 0 : 1), p.chain);
     outline(set, get, W, W);
+  });
+}
+
+// A top-down motorbike (facing RIGHT) with 3 riders on it: triple seat!
+export function bikeCanvas(riders) {
+  const W = 40;
+  const H = 22;
+  return pixelCanvas(W, H, 2, (set, get) => {
+    const cy = 11;
+    // wheels
+    for (const wx of [3, 34]) for (let x = 0; x < 5; x++) for (let y = -1; y <= 1; y++) set(wx + x, cy + y, '#111111');
+    // body / seat
+    for (let x = 6; x < 34; x++) for (let y = -2; y <= 2; y++) set(x, cy + y, y === -2 ? '#9d0208' : '#6a040f');
+    for (let x = 27; x < 33; x++) for (let y = -3; y <= 3; y++) set(x, cy + y, '#adb5bd'); // tank
+    for (let y = -7; y <= 7; y++) set(34, cy + y, '#343a40'); // handlebar
+    set(34, cy - 7, '#111111'); set(34, cy + 7, '#111111');
+    set(38, cy, '#fff3b0'); set(39, cy, '#fff3b0'); // headlight
+    for (let x = 4; x < 9; x++) set(x, cy + 3, '#6c757d'); // exhaust
+    // riders, front to back
+    riders.forEach((p, i) => {
+      const rx = 27 - i * 8;
+      for (let y = -6; y <= 6; y++) for (let x = -3; x <= 3; x++) {
+        if ((x * x) / 9 + (y * y) / 36 <= 1) set(rx + x, cy + y, x < 0 ? shade(p.shirt, -0.3) : p.shirt);
+      }
+      if (i === 0) { set(rx + 4, cy - 6, p.skin); set(rx + 4, cy + 6, p.skin); } // hands on the handlebar
+      disk(set, rx + 1, cy, 2.6, p.hair);
+      if (p.bandana) for (let y = -2; y <= 2; y++) set(rx + 2, cy + y, p.bandana);
+      if (p.shades) for (let y = -2; y <= 2; y++) set(rx + 4, cy + y, '#000000');
+      if (p.chain) { set(rx + 3, cy - 2, p.chain); set(rx + 3, cy + 2, p.chain); set(rx + 4, cy, p.chain); }
+    });
+    outline(set, get, W, H);
   });
 }
 

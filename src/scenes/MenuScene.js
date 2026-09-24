@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
-import { getBest } from '../storage.js';
+import { getBest, isBossUnlocked } from '../storage.js';
 import { rng } from '../art/pixels.js';
+import { enterFullscreen, addFullscreenButton, isIOS, isStandalone } from '../mobile.js';
 
 const CAST = [
   ['face_player', 'YOU', '#9bf6ff'],
@@ -44,29 +45,50 @@ export default class MenuScene extends Phaser.Scene {
       `Warden check? Sneak ${CONFIG.guestName} out to the gate`,
       'Gang bombs? Dodge the red circles & ring the bell',
       'Escape the seniors  ·  Stay fresh, even in a water cut',
+      `Survive ${CONFIG.bossNight - 1} nights, then face ${CONFIG.bossName} on BOSS NIGHT!`,
     ];
-    this.add.text(cx, 330, how.join('\n'), {
-      fontFamily: FONT, fontSize: '16px', color: '#ffffff', align: 'center', lineSpacing: 6, stroke: '#000', strokeThickness: 4,
+    this.add.text(cx, 334, how.join('\n'), {
+      fontFamily: FONT, fontSize: '15px', color: '#ffffff', align: 'center', lineSpacing: 3, stroke: '#000', strokeThickness: 4,
     }).setOrigin(0.5);
 
     const touch = this.sys.game.device.input.touch;
-    this.add.text(cx, 398, touch ? 'Left side: move  ·  ACT button: knock / interact' : 'WASD / Arrows: move  ·  SPACE: knock / interact  ·  M: mute', {
+    let controls = touch ? 'Left side: move  ·  ACT button: knock / interact' : 'WASD / Arrows: move  ·  SPACE: knock / interact  ·  M: mute';
+    if (touch && isIOS() && !isStandalone()) controls += '\niPhone tip: Share → "Add to Home Screen" for full screen';
+    this.add.text(cx, 414, controls, {
+      align: 'center',
       fontFamily: FONT, fontSize: '14px', color: '#adb5bd', stroke: '#000', strokeThickness: 3,
     }).setOrigin(0.5);
 
-    const btn = this.add.rectangle(cx, 455, 330, 60, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
-    const label = this.add.text(cx, 457, 'START NIGHT 1', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
+    const bossUnlocked = isBossUnlocked();
+    const bx = bossUnlocked ? cx - 130 : cx;
+    const btn = this.add.rectangle(bx, 462, 330, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
+    const label = this.add.text(bx, 464, 'START NIGHT 1', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
     this.tweens.add({ targets: [btn, label], scale: 1.05, duration: 600, yoyo: true, repeat: -1 });
 
     const best = getBest();
-    if (best > 0) this.add.text(cx, 510, `BEST SCORE: ${best}`, { fontFamily: FONT, fontSize: '16px', color: '#80ffdb', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5);
+    if (best > 0) this.add.text(cx, 515, `BEST SCORE: ${best}`, { fontFamily: FONT, fontSize: '16px', color: '#80ffdb', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5);
+
+    if (touch) addFullscreenButton(this, 40, 30);
 
     const start = () => {
+      enterFullscreen(this);
       sfx.unlock();
       sfx.knock();
       this.scene.start('NightIntro', { night: 1, score: 0, lives: CONFIG.lives, knocks: 0 });
     };
-    btn.on('pointerdown', start);
+    btn.on('pointerup', start);
+
+    // Replay the finale once you've reached it
+    if (bossUnlocked) {
+      const bossBtn = this.add.rectangle(cx + 190, 462, 220, 56, 0xd62828).setStrokeStyle(4, 0x2a0008).setInteractive({ useHandCursor: true });
+      this.add.text(cx + 190, 464, 'BOSS NIGHT', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
+      bossBtn.on('pointerup', () => {
+        enterFullscreen(this);
+        sfx.unlock();
+        sfx.engine();
+        this.scene.start('NightIntro', { night: CONFIG.bossNight, score: 0, lives: CONFIG.lives, knocks: 0 });
+      });
+    }
     this.input.keyboard.once('keydown-SPACE', start);
     this.input.keyboard.once('keydown-ENTER', start);
   }

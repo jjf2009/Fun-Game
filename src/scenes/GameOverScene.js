@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { getBest, saveBest } from '../storage.js';
+import { shareText } from '../mobile.js';
 
 const TITLES = [
   [0, 'Innocent Fresher'],
@@ -50,12 +51,12 @@ export default class GameOverScene extends Phaser.Scene {
     const again = this.add.rectangle(560, 390, 300, 60, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
     this.add.text(560, 392, 'PLAY AGAIN', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
 
-    const share = this.add.text(560, 460, 'Copy score to share on WhatsApp', {
+    const share = this.add.text(560, 460, navigator.share ? 'Share your score on WhatsApp' : 'Copy score to share on WhatsApp', {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    share.on('pointerdown', () => {
+    share.on('pointerup', () => {
       const text = `I scored ${score} in ${CONFIG.gameTitle} (${title}) and survived ${night - 1} nights at ${CONFIG.hostelName}! Beat me: ${window.location.href}`;
-      navigator.clipboard?.writeText(text).then(() => share.setText('Copied! Paste it in the group 😎'), () => share.setText(text));
+      shareText(text, (msg) => share.setText(msg));
     });
 
     const restart = () => this.scene.start('Menu');

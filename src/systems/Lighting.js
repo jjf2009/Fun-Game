@@ -66,13 +66,23 @@ export class Lighting {
 
     // Warden torch
     const w = s.warden;
-    if (w?.active) {
+    if (w?.active && !w.stationed) {
       const range = w.stats.range;
       this.cone.setRotation(w.facing).setScale((range * 1.15) / 256).setAlpha(1);
       this.rt.erase(this.cone, w.x - ox, w.y - oy);
       erase(w.x, w.y, 40, 0.6);
     }
 
+    if (s.bossFight) {
+      erase(s.bossFight.desk.x, s.bossFight.desk.y, 110, 0.9);
+      for (const bk of s.bossFight.bikes) {
+        if (!bk.sprite) continue;
+        // headlight in the direction of travel
+        const a = bk.sprite.rotation;
+        erase(bk.sprite.x + Math.cos(a) * 60, bk.sprite.y + Math.sin(a) * 60, 70, 0.8);
+        erase(bk.sprite.x, bk.sprite.y, 55, 0.7);
+      }
+    }
     if (s.water.bucket) erase(s.water.bucket.x, s.water.bucket.y, 60 + Math.sin(time / 150) * 10, 0.9);
     if (s.gang.active) erase(s.map.bell.x, s.map.bell.y, 70 + Math.sin(time / 100) * 15, 1);
     if (s.raid.guest) erase(s.raid.guest.x, s.raid.guest.y, 50, 0.6);

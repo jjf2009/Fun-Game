@@ -4,7 +4,7 @@
 export const CONFIG = {
   // ---- Names (personalize these) ----
   gameTitle: 'HOSTEL NIGHTS',
-  hostelName: 'Boys Hostel - Block C',
+  hostelName: 'GEC Boys Hostel',
   wardenName: 'Warden Sir',
   guestName: 'Bunty',            // your non-hosteller friend who sneaks in
   myRoom: 111,                   // your room number (101-116 or 201-216)
@@ -31,6 +31,15 @@ export const CONFIG = {
   // ---- Outsider gang ----
   gangRaidDuration: 15,
   bombRadius: 46,
+
+  // ---- Boss Night (the finale) ----
+  bossNight: 5,                  // this night is the boss fight
+  bossName: 'BIKE BHAI',         // leader of the outsider gang
+  boss: {
+    photoRange: 230,             // how close you must be to photograph a bike
+    henchmanProof: 2,            // photos needed to suspend each henchman bike
+    bossProof: 3,                // photos needed to suspend the boss
+  },
 
   // ---- Water ----
   freshDrain: 1.25,              // freshness lost per second

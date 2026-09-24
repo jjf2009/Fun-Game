@@ -9,6 +9,7 @@ import GameScene from './scenes/GameScene.js';
 import UIScene from './scenes/UIScene.js';
 import RaggingScene from './scenes/RaggingScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
+import VictoryScene from './scenes/VictoryScene.js';
 
 function startGame() {
   const game = new Phaser.Game({
@@ -21,7 +22,7 @@ function startGame() {
     physics: { default: 'arcade', arcade: { debug: false } },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },
-    scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene],
+    scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene, VictoryScene],
   });
   // Handy for debugging in the browser console.
   window.game = game;

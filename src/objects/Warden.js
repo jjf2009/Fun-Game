@@ -58,7 +58,22 @@ export class Warden extends Npc {
     return hasLineOfSight(this.x, this.y, x, y);
   }
 
+  // Boss Night: the warden stays at the Anti-Ragging Cell desk to take complaints.
+  station() {
+    this.stationed = true;
+    this.facing = Math.PI / 2;
+    this.setRotation(this.facing);
+    this.path = [];
+    this.label.setText(`${CONFIG.wardenName.toUpperCase()} (ANTI-RAGGING)`);
+  }
+
   update(time) {
+    if (this.stationed) {
+      this.setVelocity(0, 0);
+      this.cone.clear();
+      this.alert.setVisible(false);
+      return;
+    }
     const s = this.scene;
     const p = s.player;
     const st = this.stats;

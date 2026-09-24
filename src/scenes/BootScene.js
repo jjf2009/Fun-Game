@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PEOPLE, personCanvas, tileCanvases, propCanvases, lightCanvas, coneCanvas } from '../art/pixels.js';
+import { PEOPLE, personCanvas, bikeCanvas, tileCanvases, propCanvases, lightCanvas, coneCanvas } from '../art/pixels.js';
 import { loadPortraits } from '../art/portraits.js';
 import { FONT } from '../config.js';
 
@@ -25,6 +25,10 @@ export default class BootScene extends Phaser.Scene {
         repeat: -1,
       });
     }
+
+    // Boss Night bikes (3 riders each)
+    this.textures.addCanvas('bike', bikeCanvas([PEOPLE.gang, PEOPLE.gang, PEOPLE.gang]));
+    this.textures.addCanvas('bike_boss', bikeCanvas([PEOPLE.boss, PEOPLE.gang, PEOPLE.gang]));
 
     const tiles = tileCanvases();
     this.registry.set('tiles', tiles);

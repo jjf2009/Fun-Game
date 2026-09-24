@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CONFIG, FONT } from '../config.js';
 import { input } from '../controls.js';
+import { addFullscreenButton } from '../mobile.js';
 
 // The HUD drawn on top of the game: score, lives, clock, freshness, event banners
 // and (on phones) the on-screen joystick + action button.
@@ -39,6 +40,7 @@ export default class UIScene extends Phaser.Scene {
 
   createTouchControls() {
     this.input.addPointer(2);
+    addFullscreenButton(this, 780, 18);
     this.joyBase = this.add.circle(130, 420, 60, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 0.35);
     this.joyThumb = this.add.circle(130, 420, 26, 0xffffff, 0.35);
     this.joyPointer = null;
@@ -119,7 +121,8 @@ export default class UIScene extends Phaser.Scene {
     const h24 = Math.floor(mins / 60) % 24;
     const m = Math.floor(mins % 60);
     const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-    this.clockText.setText(`🌙 ${h12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`);
+    this.clockText.setText(g.bossNight ? '🏍️ BOSS NIGHT' : `🌙 ${h12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`);
+    if (g.bossNight) this.nightText.setText('FINAL NIGHT · Save the hostel!');
 
     const f = Phaser.Math.Clamp(g.water.freshness, 0, 100) / 100;
     this.freshBar.width = 150 * f;
@@ -127,6 +130,16 @@ export default class UIScene extends Phaser.Scene {
     this.comboText.setText(g.combo > 1 ? `COMBO x${g.combo}` : '');
 
     const status = [];
+    if (g.bossFight) {
+      // Complaint progress for each bike: filled boxes = proof filed, half = photos carried
+      for (const bk of g.bossFight.bikes) {
+        const done = bk.state === 'suspended' || bk.state === 'gone';
+        const boxes = '■'.repeat(Math.min(bk.proof, bk.need)) + '▣'.repeat(Math.min(bk.carried, bk.need - bk.proof)) + '□'.repeat(Math.max(0, bk.need - bk.proof - bk.carried));
+        status.push(done ? `${bk.name}  ✅ SUSPENDED` : `${bk.name}  ${boxes}`);
+      }
+      status.push(`📸 Photos in phone: ${g.bossFight.carried}`);
+      if (g.bossFight.rage) status.push(`😡 ${CONFIG.bossName} IS FURIOUS`);
+    }
     if (g.raid.active) {
       status.push(`🚨 WARDEN CHECK ${Math.ceil(g.raid.timeLeft)}s`);
       status.push(g.raid.state === 'inRoom' ? `Get ${CONFIG.guestName} out of room ${CONFIG.myRoom}` : `Take ${CONFIG.guestName} to the MAIN GATE`);
