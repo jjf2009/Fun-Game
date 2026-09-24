@@ -3,6 +3,7 @@ import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
 import { getBest, isBossUnlocked } from '../storage.js';
 import { rng } from '../art/pixels.js';
+import { enterFullscreen, addFullscreenButton, isIOS, isStandalone } from '../mobile.js';
 
 const CAST = [
   ['face_player', 'YOU', '#9bf6ff'],
@@ -22,7 +23,7 @@ export default class MenuScene extends Phaser.Scene {
     this.drawSkyline();
 
     const title = this.add.text(cx, 62, CONFIG.gameTitle, {
-      fontFamily: TITLE_FONT, fontSize: '40px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 10,
+      fontFamily: TITLE_FONT, fontSize: '44px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 10,
     }).setOrigin(0.5);
     title.setShadow(4, 4, '#000000', 0, true, true);
     this.tweens.add({ targets: title, y: 68, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
@@ -51,7 +52,10 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const touch = this.sys.game.device.input.touch;
-    this.add.text(cx, 416, touch ? 'Left side: move  ·  ACT button: knock / interact' : 'WASD / Arrows: move  ·  SPACE: knock / interact  ·  M: mute', {
+    let controls = touch ? 'Left side: move  ·  ACT button: knock / interact' : 'WASD / Arrows: move  ·  SPACE: knock / interact  ·  M: mute';
+    if (touch && isIOS() && !isStandalone()) controls += '\niPhone tip: Share → "Add to Home Screen" for full screen';
+    this.add.text(cx, 414, controls, {
+      align: 'center',
       fontFamily: FONT, fontSize: '14px', color: '#adb5bd', stroke: '#000', strokeThickness: 3,
     }).setOrigin(0.5);
 
@@ -64,18 +68,22 @@ export default class MenuScene extends Phaser.Scene {
     const best = getBest();
     if (best > 0) this.add.text(cx, 515, `BEST SCORE: ${best}`, { fontFamily: FONT, fontSize: '16px', color: '#80ffdb', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5);
 
+    if (touch) addFullscreenButton(this, 40, 30);
+
     const start = () => {
+      enterFullscreen(this);
       sfx.unlock();
       sfx.knock();
       this.scene.start('NightIntro', { night: 1, score: 0, lives: CONFIG.lives, knocks: 0 });
     };
-    btn.on('pointerdown', start);
+    btn.on('pointerup', start);
 
     // Replay the finale once you've reached it
     if (bossUnlocked) {
       const bossBtn = this.add.rectangle(cx + 190, 462, 220, 56, 0xd62828).setStrokeStyle(4, 0x2a0008).setInteractive({ useHandCursor: true });
       this.add.text(cx + 190, 464, 'BOSS NIGHT', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
-      bossBtn.on('pointerdown', () => {
+      bossBtn.on('pointerup', () => {
+        enterFullscreen(this);
         sfx.unlock();
         sfx.engine();
         this.scene.start('NightIntro', { night: CONFIG.bossNight, score: 0, lives: CONFIG.lives, knocks: 0 });

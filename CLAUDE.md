@@ -1,4 +1,4 @@
-# GEC Hostel Nights: notes for AI assistants
+# Hostel Nights: notes for AI assistants
 
 The owner builds this game only with AI and has no game-dev background, so keep changes simple and explain them in plain language.
 

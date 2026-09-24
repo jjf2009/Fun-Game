@@ -3,7 +3,7 @@
 
 export const CONFIG = {
   // ---- Names (personalize these) ----
-  gameTitle: 'GEC HOSTEL NIGHTS',
+  gameTitle: 'HOSTEL NIGHTS',
   hostelName: 'GEC Boys Hostel',
   wardenName: 'Warden Sir',
   guestName: 'Bunty',            // your non-hosteller friend who sneaks in

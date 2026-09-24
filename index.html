@@ -2,20 +2,47 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0d0f1a" />
-    <title>GEC Hostel Nights</title>
+    <meta name="description" content="Hostel Nights: knock on doors and run, dodge the warden, survive the outsider gang. A hostel-life game for phone and PC." />
+    <!-- "Add to Home Screen" support: opens full screen like an app -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Hostel Nights" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="icon" type="image/png" href="./icon-192.png" />
+    <!-- Link previews (e.g. when shared on WhatsApp) -->
+    <meta property="og:title" content="Hostel Nights" />
+    <meta property="og:description" content="Knock. Run. Survive the night. Can you save the hostel?" />
+    <meta property="og:image" content="./icon-512.png" />
+    <title>Hostel Nights</title>
     <style>
-      html, body { margin: 0; padding: 0; height: 100%; background: #0d0f1a; overflow: hidden; touch-action: none; }
-      #game { width: 100vw; height: 100vh; }
-      #rotate { display: none; position: fixed; inset: 0; color: #fff; font: 18px monospace; background: #0d0f1a;
-        align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 10; }
-      @media (orientation: portrait) and (max-width: 700px) { #rotate { display: flex; } }
+      html, body {
+        margin: 0; padding: 0; height: 100%; background: #0d0f1a; overflow: hidden;
+        touch-action: none; overscroll-behavior: none;
+        -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #game { position: fixed; inset: 0; }
+      canvas { display: block; }
+      #rotate {
+        display: none; position: fixed; inset: 0; color: #ffe066; font: 18px monospace; background: #0d0f1a;
+        flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 10;
+      }
+      #rotate .phone { font-size: 64px; animation: turn 1.6s ease-in-out infinite; }
+      @keyframes turn { 0%, 30% { transform: rotate(0deg); } 60%, 100% { transform: rotate(90deg); } }
+      /* Only phones held upright see this */
+      @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
     </style>
   </head>
   <body>
     <div id="game"></div>
-    <div id="rotate">📱↻<br /><br />Rotate your phone sideways to play GEC Hostel Nights</div>
+    <div id="rotate">
+      <div class="phone">📱</div>
+      <p>Turn your phone sideways to play <b>Hostel Nights</b></p>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

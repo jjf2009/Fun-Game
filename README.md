@@ -1,8 +1,16 @@
-# 🌙 GEC Hostel Nights
+# 🌙 Hostel Nights
 
 A top-down browser game about college hostel life. Knock on doors at 2 AM and run, dodge the warden's flashlight, sneak your non-hosteller friend out during a surprise check, survive the outsider gang's bomb attacks, escape the seniors, and stay fresh through the water cuts.
 
 Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
+
+## 📱 Play on your phone
+
+- Open the game link in Chrome (Android) or Safari (iPhone) and **turn your phone sideways**.
+- **Left side of the screen** = joystick (drag anywhere on the left half). **ACT** button = knock / interact.
+- Tap **⛶** (top of the screen) for full screen on Android.
+- **Install it like an app:** Android: Chrome menu → *Add to Home screen*. iPhone: Share → *Add to Home Screen*. It then opens full screen, in landscape, with its own icon.
+- The share button on the results screen opens your phone's share sheet, so you can send your score straight to WhatsApp.
 
 ## How to play
 

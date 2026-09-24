@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CONFIG, FONT } from '../config.js';
 import { input } from '../controls.js';
+import { addFullscreenButton } from '../mobile.js';
 
 // The HUD drawn on top of the game: score, lives, clock, freshness, event banners
 // and (on phones) the on-screen joystick + action button.
@@ -39,6 +40,7 @@ export default class UIScene extends Phaser.Scene {
 
   createTouchControls() {
     this.input.addPointer(2);
+    addFullscreenButton(this, 780, 18);
     this.joyBase = this.add.circle(130, 420, 60, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 0.35);
     this.joyThumb = this.add.circle(130, 420, 26, 0xffffff, 0.35);
     this.joyPointer = null;

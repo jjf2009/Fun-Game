@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
 import { getBest, saveBest } from '../storage.js';
+import { shareText } from '../mobile.js';
 
 // You got the boss suspended. You win!
 export default class VictoryScene extends Phaser.Scene {
@@ -58,12 +59,12 @@ export default class VictoryScene extends Phaser.Scene {
     const again = this.add.rectangle(480, 440, 300, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
     this.add.text(480, 442, 'PLAY AGAIN', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
 
-    const share = this.add.text(480, 500, 'Copy score to share on WhatsApp', {
+    const share = this.add.text(480, 500, navigator.share ? 'Share your score on WhatsApp' : 'Copy score to share on WhatsApp', {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    share.on('pointerdown', () => {
+    share.on('pointerup', () => {
       const text = `I got ${CONFIG.bossName}'s gang SUSPENDED and saved ${CONFIG.hostelName} in ${CONFIG.gameTitle} with ${score} points! Can you? ${window.location.href}`;
-      navigator.clipboard?.writeText(text).then(() => share.setText('Copied! Paste it in the group 😎'), () => share.setText(text));
+      shareText(text, (msg) => share.setText(msg));
     });
 
     sfx.win();
