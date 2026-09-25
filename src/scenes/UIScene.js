@@ -27,6 +27,10 @@ export default class UIScene extends Phaser.Scene {
     this.freshParts = [drop, freshBg, this.freshBar]; // hidden in story mode (no water cuts there)
     this.comboText = this.add.text(12, 106, '', { ...style, fontSize: '14px', color: '#80ffdb' });
     this.statusText = this.add.text(948, 44, '', { ...style, fontSize: '15px', align: 'right' }).setOrigin(1, 0);
+    // Pause button (keyboard: ESC or P)
+    const pause = this.add.text(720, 18, '⏸', { ...style, fontSize: '20px', backgroundColor: '#00000066', padding: { x: 8, y: 2 } })
+      .setOrigin(0.5).setInteractive({ useHandCursor: true });
+    pause.on('pointerup', () => this.scene.get('Game').openPause());
     this.hintText = this.add.text(480, this.isTouch ? 440 : 515, '', {
       ...style, fontSize: '17px', backgroundColor: '#000000aa', padding: { x: 8, y: 4 },
     }).setOrigin(0.5);

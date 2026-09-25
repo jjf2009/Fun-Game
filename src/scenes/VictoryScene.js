@@ -75,6 +75,6 @@ export default class VictoryScene extends Phaser.Scene {
     sfx.win();
     this.time.delayedCall(700, () => sfx.win());
     const restart = coopEndButtons(this, this.result.mp, again, againLabel);
-    this.time.delayedCall(1500, () => this.input.keyboard.once('keydown-SPACE', restart));
+    this.time.delayedCall(1500, () => this.input.keyboard.on('keydown-SPACE', () => !this.lbPanel && restart()));
   }
 }
