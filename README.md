@@ -14,6 +14,11 @@ Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 - **Install it like an app:** Android: Chrome menu → *Add to Home screen*. iPhone: Share → *Add to Home Screen*. It then opens full screen, in landscape, with its own icon.
 - The share button on the results screen opens your phone's share sheet, so you can send your score straight to WhatsApp.
 
+## Controls & help
+
+- **Pause:** the ⏸ button at the top of the screen, or ESC / P. From there you can mute the sound, read *How to play*, or quit. In co-op the game keeps running while you're paused, because your friend is still playing.
+- **How to play:** three short pages that open automatically the first time you tap PLAY. You can reopen them any time from the ❓ button on the menu.
+
 ## Two modes
 
 Tap **PLAY** and choose:
@@ -101,7 +106,7 @@ Then open the link it prints (usually http://localhost:5173). `npm run dev` also
 
 ## 🏆 Online leaderboard (TOP 10)
 
-There are three boards: **EASY**, **HARD** (highest score) and **STORY** (fastest full run). After a game, tap **🏆 SUBMIT SCORE** and type a nickname. Tap **🏆 TOP 10** on the menu to see the boards.
+There are three boards: **EASY**, **HARD** (highest score) and **STORY** (fastest full run). After a game, tap **🏆 SUBMIT SCORE**. Everyone gets a random funny name like *Sleepy Maggi 42* (tap 🎲 for a new one). No typing means no rude names, and everyone stays anonymous. The word lists are in `src/names.js`. Tap **🏆 TOP 10** on the menu to see the boards.
 
 It's switched off until you connect a free Firebase database (about 5 minutes, no credit card):
 

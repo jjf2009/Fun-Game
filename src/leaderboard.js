@@ -11,16 +11,11 @@ export const BOARDS = {
 };
 
 const MOCK = new URLSearchParams(window.location.search).get('leaderboard') === 'mock';
-const NAME_KEY = 'hostelNights.playerName';
 
 export const leaderboardReady = () => MOCK || !!CONFIG.leaderboard.firebase;
 
-export function savedName() {
-  try { return localStorage.getItem(NAME_KEY) || ''; } catch { return ''; }
-}
-
-// Keep names short and plain: letters, numbers, spaces and a few symbols.
-export function cleanName(name) {
+// Keep names short and plain (names come from src/names.js, this is just a safety net).
+function cleanName(name) {
   return (name || '').replace(/[^\p{L}\p{N} _.&'-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16);
 }
 
@@ -56,7 +51,6 @@ export async function topScores(board) {
 export async function submitScore(board, rawName, score, coop = false) {
   const name = cleanName(rawName);
   score = Math.round(score);
-  try { localStorage.setItem(NAME_KEY, name); } catch { /* ignore */ }
   const lower = BOARDS[board].lowerIsBetter;
   if (MOCK) {
     const list = mockRead(board);

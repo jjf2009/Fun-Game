@@ -42,7 +42,7 @@ export class Lighting {
   }
 
   flash(x, y, r, duration) {
-    this.flashes.push({ x, y, r, start: this.scene.game.loop.time, duration });
+    this.flashes.push({ x, y, r, start: this.scene.now, duration });
     this.scene.netEvent?.({ k: 'lf', x, y, r, duration }); // co-op: flash on the friend's screen too
   }
 

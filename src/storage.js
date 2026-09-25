@@ -80,3 +80,22 @@ export function saveStoryTime(seconds) {
   }
   return true;
 }
+
+// "How to play" is shown automatically only the first time
+const HOWTO_KEY = 'hostelNights.seenHowTo';
+
+export function seenHowTo() {
+  try {
+    return localStorage.getItem(HOWTO_KEY) === '1';
+  } catch {
+    return true;
+  }
+}
+
+export function markHowToSeen() {
+  try {
+    localStorage.setItem(HOWTO_KEY, '1');
+  } catch {
+    // ignore
+  }
+}

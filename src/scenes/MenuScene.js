@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
-import { getBest, isBossUnlocked } from '../storage.js';
+import { getBest, isBossUnlocked, seenHowTo, markHowToSeen } from '../storage.js';
 import { rng } from '../art/pixels.js';
 import { enterFullscreen, addFullscreenButton, isIOS, isStandalone } from '../mobile.js';
 import { endSession } from '../net/session.js';
@@ -103,8 +103,16 @@ export default class MenuScene extends Phaser.Scene {
     this.add.text(90, 517, '🏆 TOP 10', { fontFamily: TITLE_FONT, fontSize: '11px', color: '#ffffff' }).setOrigin(0.5);
     topBtn.on('pointerup', () => this.scene.start('Leaderboard'));
 
-    const start = () => this.showModePicker(1);
+    // First time: show "How to play", then the mode picker
+    const start = () => {
+      if (seenHowTo()) this.showModePicker(1);
+      else this.openHowTo(() => this.showModePicker(1));
+    };
     btn.on('pointerup', start);
+
+    const help = this.add.rectangle(700, 516, 150, 36, 0x1d3557).setStrokeStyle(3, 0x80ffdb).setInteractive({ useHandCursor: true });
+    this.add.text(700, 517, '❓ HOW TO PLAY', { fontFamily: TITLE_FONT, fontSize: '10px', color: '#ffffff' }).setOrigin(0.5);
+    help.on('pointerup', () => this.openHowTo());
 
     // Replay the finale once you've reached it
     if (bossUnlocked) {
@@ -114,6 +122,20 @@ export default class MenuScene extends Phaser.Scene {
     }
     this.input.keyboard.once('keydown-SPACE', start);
     this.input.keyboard.once('keydown-ENTER', start);
+  }
+
+  // The menu waits (paused) underneath while the pages are open
+  openHowTo(then) {
+    if (this.picker) return;
+    sfx.unlock();
+    markHowToSeen();
+    this.scene.pause();
+    this.scene.launch('HowTo', {
+      onDone: () => {
+        this.scene.resume();
+        then?.();
+      },
+    });
   }
 
   // EASY or HARD? Starts Night 1 (or Boss Night) in the chosen mode.

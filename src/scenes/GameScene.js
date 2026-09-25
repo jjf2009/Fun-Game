@@ -32,6 +32,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
+    this.pausedAt = null; // see pauseGame()
+    this.pausedMs = 0;
     this.night = data.night ?? 1;
     this.score = data.score ?? 0;
     this.mode = data.mode === 'hard' ? 'hard' : 'easy';
@@ -68,6 +70,8 @@ export default class GameScene extends Phaser.Scene {
     // ACTION key: listen for the key-down event so even a super quick tap is never missed
     this.input.keyboard.on('keydown-SPACE', () => input.queueAction());
     this.input.keyboard.on('keydown-E', () => input.queueAction());
+    this.input.keyboard.on('keydown-ESC', () => this.openPause());
+    this.input.keyboard.on('keydown-P', () => this.openPause());
     this.input.keyboard.on('keydown-M', () => this.game.events.emit('banner', sfx.toggleMute() ? '🔇 Sound off' : '🔊 Sound on', '#ffffff'));
     input.reset();
     this.cameras.main.setBounds(0, 0, COLS * TILE, ROWS * TILE);
@@ -147,10 +151,30 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  // Real game time in ms. (The scene clock, this.time.now, freezes while the scene is
-  // paused for a ragging task, so it is stale right after resuming. Don't use it for timers.)
+  // Game time in ms, used for all timers. It stops while the game is paused (pause menu,
+  // ragging task, story pop-ups), so pausing can't be used to skip a raid or a water cut.
+  // (Don't use this.time.now: it is stale right after resuming.)
   get now() {
-    return this.game.loop.time;
+    return (this.pausedAt ?? this.game.loop.time) - (this.pausedMs ?? 0);
+  }
+
+  // Solo only: freeze the game + HUD while a pop-up screen is open
+  pauseGame() {
+    if (this.pausedAt != null) return;
+    this.pausedAt = this.game.loop.time;
+    this.player.setVelocity(0, 0);
+    this.scene.pause();
+    this.scene.pause('UI');
+  }
+
+  resumeGame() {
+    if (this.pausedAt == null) return;
+    this.pausedMs = (this.pausedMs ?? 0) + this.game.loop.time - this.pausedAt;
+    this.pausedAt = null;
+    this.scene.resume();
+    this.scene.resume('UI');
+    this.input.keyboard.resetKeys();
+    input.reset();
   }
 
   // ---------- Players ----------
@@ -377,7 +401,8 @@ export default class GameScene extends Phaser.Scene {
 
   // ---------- Main loop ----------
 
-  update(time, delta) {
+  update(_loopTime, delta) {
+    const time = this.now;
     if (this.mirror) {
       this.mirror.update(time, delta);
       return;
@@ -639,15 +664,11 @@ export default class GameScene extends Phaser.Scene {
     if (!this.hostNet) {
       // Solo: pause the whole game while you do the task
       this.inRagging = true;
-      this.scene.pause();
-      this.scene.pause('UI');
+      this.pauseGame();
       this.scene.launch('Ragging', {
         night: this.night,
         onDone: (success) => {
-          this.scene.resume();
-          this.scene.resume('UI');
-          this.input.keyboard.resetKeys();
-          input.reset();
+          this.resumeGame();
           this.inRagging = false;
           this.finishRagging(p, success);
         },
@@ -761,18 +782,22 @@ export default class GameScene extends Phaser.Scene {
     this.time.delayedCall(1200, () => this.leave('Victory', { score: this.score, knocks: this.knocks, lives: this.lives, mode: this.mode }));
   }
 
+  // Pause menu. Solo: freezes the game. Co-op: the game keeps running (the friend is still playing).
+  openPause() {
+    if (this.over || this.inRagging || ['Ragging', 'Dialogue', 'Email', 'Pause', 'HowTo'].some((k) => this.scene.isActive(k))) return;
+    const coop = !!(this.hostNet || this.mirror);
+    if (!coop) this.pauseGame();
+    this.scene.launch('Pause', { coop, story: !!this.story, onResume: () => { if (!coop) this.resumeGame(); } });
+    this.scene.bringToTop('Pause');
+  }
+
   // Opens a pop-up screen (Dialogue, Email) and pauses the game while it's open (solo only).
   runOverlay(key, data, onDone) {
-    this.player.setVelocity(0, 0);
-    this.scene.pause();
-    this.scene.pause('UI');
+    this.pauseGame();
     this.scene.launch(key, {
       ...data,
       onDone: (result) => {
-        this.scene.resume();
-        this.scene.resume('UI');
-        this.input.keyboard.resetKeys();
-        input.reset();
+        this.resumeGame();
         onDone(result);
       },
     });

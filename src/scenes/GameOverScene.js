@@ -65,6 +65,6 @@ export default class GameOverScene extends Phaser.Scene {
     addSubmitButton(this, 170, 440, { board: mode, score, coop: !!this.result.mp });
 
     const restart = coopEndButtons(this, this.result.mp, again, againLabel);
-    this.time.delayedCall(600, () => this.input.keyboard.once('keydown-SPACE', restart));
+    this.time.delayedCall(600, () => this.input.keyboard.on('keydown-SPACE', () => !this.lbPanel && restart()));
   }
 }
