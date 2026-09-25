@@ -12,7 +12,7 @@ import { Rebel } from '../objects/Rebel.js';
 //                  everyone out (a scripted scene you can't escape), and nobody does anything.
 //  Ch2 Evidence  : photograph 3 ragging scenes without being seen, bring the photos to your room
 //  Ch3 Witnesses : talk 3 scared juniors into giving statements (they become allies)
-//  Ch4 Speak Up  : reach the common room computer, send the anonymous complaint, survive till morning
+//  Ch4 Speak Up  : take the photos and statements to Warden Sir's office and complain in person
 export class StoryDirector {
   constructor(scene, chapter) {
     this.s = scene;
@@ -293,50 +293,59 @@ export class StoryDirector {
   }
 
   // ---------------- Chapter 4: SPEAK UP ----------------
+  // Take the proof (photos + statements) to Warden Sir's office and complain in person.
   setup4() {
     const s = this.s;
     // The seniors are hunting for whoever is planning to complain
     s.modeCfg = { ...s.modeCfg, seniorSpeed: 1.05, seniorSight: 170 };
     this.addSeniors(3);
-    this.pc = tileCenter(11, 17);
-    s.add.image(this.pc.x, this.pc.y + 10, 'desk').setRotation(Math.PI / 2).setDepth(3);
-    // a little monitor on the desk
-    s.add.rectangle(this.pc.x, this.pc.y + 6, 22, 15, 0x1b263b).setDepth(4);
-    s.add.rectangle(this.pc.x, this.pc.y + 5, 18, 11, 0x9bf6ff).setDepth(4);
-    this.pcLight = s.lighting.addLight(this.pc.x, this.pc.y + 6, 60, 0.9, 0x9bf6ff);
-    s.add.text(this.pc.x, this.pc.y + 34, '💻 COMMON ROOM PC', {
-      fontFamily: FONT, fontSize: '12px', color: '#000', backgroundColor: '#9bf6ff', padding: { x: 4, y: 2 },
-    }).setOrigin(0.5).setDepth(17);
-    this.gPc = this.goal('Reach the common room computer (bottom of the lobby)');
-    this.gSend = this.goal('Send the anti-ragging complaint, anonymously');
-    this.gSurvive = this.goal('Hide and survive until morning');
-    this.surviveLeft = 0;
-    s.time.delayedCall(800, () => s.banner('😠 The seniors are hunting for "the complainer". Don\'t get caught!', '#ff6b6b'));
+    s.warden.label.setText('WARDEN SIR (awake, in office)');
+    this.office = { x: s.warden.x, y: s.warden.y };
+    this.officeLight = s.lighting.addLight(this.office.x, this.office.y, 70, 0.9, 0xffe8a3); // his lamp is on
+    this.gOffice = this.goal("Reach Warden Sir's office (top left, by the courtyard)");
+    this.gComplain = this.goal('Show him the photos and statements, and complain');
+    this.gCaught = this.goal('Watch Warden Sir deal with the seniors');
+    s.time.delayedCall(800, () => s.banner('😠 The seniors are hunting for "the complainer". Get your proof to Warden Sir!', '#ff6b6b'));
   }
 
-  update4(dt) {
-    const p = this.s.player;
-    if (!this.gPc.done && this.near(p, this.pc, 60)) this.gPc.done = true;
-    if (this.surviveLeft > 0) {
-      this.surviveLeft -= dt;
-      this.gSurvive.text = `Hide and survive until morning (${Math.ceil(this.surviveLeft)}s)`;
-      if (this.surviveLeft <= 0) {
-        this.gSurvive.done = true;
-        this.complete();
-      }
-    }
+  atOffice(p) {
+    return this.near(p, this.office, 95);
   }
 
-  sendEmail() {
+  update4() {
+    if (!this.gOffice.done && this.atOffice(this.s.player)) this.gOffice.done = true;
+  }
+
+  complain() {
     const s = this.s;
-    s.runOverlay('Email', {}, () => {
-      this.gSend.done = true;
-      this.pcLight.off = true;
-      this.surviveLeft = 30;
-      sfx.win();
-      s.banner('✉️ SENT! Nobody knows it was you. Now hide until morning!', '#80ffdb');
-      // The seniors get even more suspicious
-      s.modeCfg = { ...s.modeCfg, seniorSpeed: 1.12, seniorSight: 190 };
+    s.runOverlay('Complaint', {}, () => {
+      this.gComplain.done = true;
+      this.busy = true;
+      const p = s.player;
+      p.invulnUntil = Infinity;
+      sfx.whistle();
+      s.banner('📣 Warden Sir blows his whistle: "EVERY SENIOR IN THE CORRIDOR. NOW!"', '#ffd166');
+      // the seniors get caught one by one (the camera goes to each of them)
+      const cam = s.cameras.main;
+      const seniors = [...s.seniors];
+      const STEP = 2200;
+      cam.stopFollow();
+      seniors.forEach((sn, i) => {
+        s.time.delayedCall(1200 + i * STEP, () => {
+          if (!sn.active) return;
+          sn.setVelocity(0, 0);
+          cam.pan(sn.x, sn.y, 700, 'Sine.easeInOut');
+          s.floatText(sn.x, sn.y - 40, Phaser.Utils.Array.GetRandom(['😱 "Sir, it was a joke!"', '😰 "Sir, we were just talking!"', '😨 "Sir, please don\'t tell my parents!"']), '#ffd166', 14);
+          s.seniors = s.seniors.filter((x) => x !== sn);
+          s.tweens.add({ targets: [sn, sn.label], alpha: 0, duration: 900, delay: 1300, onComplete: () => sn.destroy() });
+        });
+      });
+      s.time.delayedCall(1200 + seniors.length * STEP + 600, () => {
+        cam.pan(p.x, p.y, 700, 'Sine.easeInOut', false, (_c, t) => { if (t === 1) cam.startFollow(p, true, 0.12, 0.12); });
+        this.gCaught.done = true;
+        s.banner('Warden Sir: "You did the right thing, beta. Go and sleep. I\'ll handle it from here."', '#80ffdb');
+        s.time.delayedCall(3200, () => this.complete());
+      });
     });
   }
 
@@ -360,7 +369,7 @@ export class StoryDirector {
       if (w) return `Talk to ${w.name} (Room ${w.room})`;
       if (this.gTalk.done && this.atMyDoor(p)) return 'Go into your room';
     }
-    if (this.n === 4 && !this.gSend.done && this.near(p, this.pc, 60)) return '✉️ Write the anti-ragging complaint';
+    if (this.n === 4 && !this.gComplain.done && this.atOffice(p)) return '🗣️ Complain to Warden Sir';
     if (this.n === 1 && this.gInside.done && this.atMyDoor(p)) return 'Go into your room (111)';
     return null;
   }
@@ -383,8 +392,8 @@ export class StoryDirector {
       if (w) { this.talk(time, w); return true; }
       if (this.gTalk.done && this.atMyDoor(p)) { this.gBack.done = true; this.complete(); return true; }
     }
-    if (this.n === 4 && !this.gSend.done && this.near(p, this.pc, 60)) {
-      this.sendEmail();
+    if (this.n === 4 && !this.gComplain.done && this.atOffice(p)) {
+      this.complain();
       return true;
     }
     return false;

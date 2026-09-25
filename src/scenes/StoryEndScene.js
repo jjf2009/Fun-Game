@@ -76,7 +76,7 @@ export default class StoryEndScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     share.on('pointerup', () => {
       const time = this.d.fullRun ? ` in ${formatTime(this.d.storyTime)}` : '';
-      shareText(`✊ I finished "Speak Up" in Hostel Nights${time}: collected proof, convinced the juniors and reported ragging anonymously.\nPlay it 👉 ${CONFIG.shareUrl}`, (msg) => share.setText(msg));
+      shareText(`✊ I finished "Speak Up" in Hostel Nights${time}: clicked photos of the ragging, convinced the juniors and complained to the warden.\nPlay it 👉 ${CONFIG.shareUrl}`, (msg) => share.setText(msg));
     });
     c.add(share);
     c.add(this.add.rectangle(480, 352, 820, 186, 0x000000, 0.45).setStrokeStyle(2, 0xffd166));

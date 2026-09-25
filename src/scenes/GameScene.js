@@ -785,14 +785,14 @@ export default class GameScene extends Phaser.Scene {
 
   // Pause menu. Solo: freezes the game. Co-op: the game keeps running (the friend is still playing).
   openPause() {
-    if (this.over || this.inRagging || ['Ragging', 'Dialogue', 'Email', 'Pause', 'HowTo'].some((k) => this.scene.isActive(k))) return;
+    if (this.over || this.inRagging || ['Ragging', 'Dialogue', 'Complaint', 'Pause', 'HowTo'].some((k) => this.scene.isActive(k))) return;
     const coop = !!(this.hostNet || this.mirror);
     if (!coop) this.pauseGame();
     this.scene.launch('Pause', { coop, story: !!this.story, onResume: () => { if (!coop) this.resumeGame(); } });
     this.scene.bringToTop('Pause');
   }
 
-  // Opens a pop-up screen (Dialogue, Email) and pauses the game while it's open (solo only).
+  // Opens a pop-up screen (Dialogue, Complaint) and pauses the game while it's open (solo only).
   runOverlay(key, data, onDone) {
     this.pauseGame();
     this.scene.launch(key, {

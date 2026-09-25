@@ -65,9 +65,10 @@ export const CHAPTERS = [
     card: [
       'The seniors have heard rumours: "Someone is planning to complain."',
       'They are searching the hostel tonight.',
-      'Reach the common room computer and send the complaint, anonymously.',
+      'Warden Sir never comes at night. So tonight, you go to HIM.',
+      'Take your photos and statements to his office, and complain.',
     ],
-    faces: ['face_senior', 'face_senior', 'face_player'],
+    faces: ['face_senior', 'face_player', 'face_warden'],
     outro: [],
   },
 ];
@@ -84,7 +85,7 @@ export const WITNESS_TALKS = {
   chintu: {
     fear: '"If I complain, they\'ll know it was me. Then it gets worse."',
     choices: [
-      { text: 'It\'s anonymous. Your name won\'t be on it.', good: true, reply: '"...Anonymous? Okay. I\'ll write down what happened."' },
+      { text: 'We go to the warden together. You won\'t face them alone.', good: true, reply: '"...Together? Okay. I\'ll write down what happened."' },
       { text: 'Just complain, don\'t be a coward.', good: false, reply: '"Easy for you to say. Get out."' },
       { text: 'We\'re a lot of juniors. They can\'t fight all of us.', good: true, reply: '"You\'re right. I\'m not the only one. Count me in."' },
     ],
@@ -94,7 +95,7 @@ export const WITNESS_TALKS = {
     choices: [
       { text: 'Better they hear it from you than never. You did nothing wrong.', good: true, reply: '"...Yeah. I did nothing wrong. Okay, I\'m in."' },
       { text: 'Do it or I\'ll tell everyone you\'re scared.', good: false, reply: '"Wow. You sound just like the seniors. Leave."' },
-      { text: 'The committee handles it quietly. You won\'t be in trouble.', good: true, reply: '"If it stays quiet... fine. I\'ll give a statement."' },
+      { text: 'Warden Sir will handle it. You won\'t be in trouble.', good: true, reply: '"If the warden is on our side... fine. I\'ll give a statement."' },
     ],
   },
   monty: {
@@ -115,19 +116,18 @@ export const WITNESS_TALKS = {
   },
 };
 
-// Chapter 4: what goes into the complaint email
-export const EMAIL_PARTS = [
-  { id: 'photos', label: '📸 Attach the 3 photos', needed: true },
-  { id: 'statements', label: '📝 Attach the 3 statements', needed: true },
-  { id: 'dates', label: '📅 Dates, times and places', needed: true },
-  { id: 'name', label: '🙋 Your name and room number', needed: false },
+// Chapter 4: the proof you show Warden Sir, and how he reacts
+export const COMPLAINT_PROOF = [
+  { label: '📸 Show the photos', caption: 'PHOTOS: 3 ragging scenes', faces: ['face_senior', 'face_j1'], reply: '"...Push-ups in the corridor? At 1 AM? These are from MY hostel?"' },
+  { label: '📝 Show the statements', caption: 'STATEMENTS: 3 juniors', faces: ['face_j1', 'face_j2', 'face_j3'], reply: '"Three juniors wrote this? It has been going on for WEEKS?"' },
+  { label: '🗣️ Tell him about 2 AM', caption: 'DATES & TIMES: every night', faces: ['face_senior', 'face_player'], reply: '"Drunk. At 2 AM. Dragging freshers out of their rooms. In my corridors."' },
 ];
 
 // The ending (after chapter 4)
 export const ENDING = [
-  ['TWO DAYS LATER', 'The anti-ragging committee started an inquiry.\nThey had photos, statements, dates. Enough to act.'],
+  ['THE NEXT MORNING', 'Warden Sir took the photos and statements straight to the anti-ragging committee.\nThis time, nobody could say it didn\'t happen.'],
   ['ONE WEEK LATER', 'The seniors involved were suspended from the hostel.\nThe college finally put SPECIAL SECURITY at the gate, and they stay awake.'],
-  ['NOW', 'Juniors walk the corridors at night without looking over their shoulders.\nNobody knows who sent the email. It doesn\'t matter.\nThe hostel spoke up together.'],
+  ['NOW', 'Juniors walk the corridors at night without looking over their shoulders.\nIt started with a few photos and one knock on the warden\'s door.\nThe hostel spoke up together.'],
 ];
 
 export const REAL_HELP = [

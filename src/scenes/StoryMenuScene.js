@@ -20,7 +20,7 @@ export default class StoryMenuScene extends Phaser.Scene {
     const progress = storyProgress();
 
     this.add.text(480, 50, '📖 STORY: SPEAK UP', { fontFamily: TITLE_FONT, fontSize: '26px', color: '#ffe066', stroke: '#000', strokeThickness: 6 }).setOrigin(0.5);
-    this.add.text(480, 98, 'The seniors rule the hostel at night. Nobody ever says anything.\nCollect proof, convince the juniors, and report it, anonymously.', {
+    this.add.text(480, 98, 'The seniors rule the hostel at night. Nobody ever says anything.\nClick photos, convince the juniors, and complain to the warden.', {
       fontFamily: FONT, fontSize: '17px', color: '#caf0f8', align: 'center',
     }).setOrigin(0.5);
 
