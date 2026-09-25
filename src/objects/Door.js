@@ -29,7 +29,10 @@ export class Door {
     this.openAt = time + Phaser.Math.Between(1300, 2300);
     this.light.setVisible(true).setFillStyle(0xffd166);
     sfx.knock();
-    this.scene.floatText(this.front.x, this.front.y - 20, 'KNOCK KNOCK!', '#ffe066');
+    // During a gang attack, knocking wakes students up to join the rebellion instead
+    this.rally = this.scene.gang.active && !this.scene.bossNight;
+    if (this.rally) this.openAt = time + 700;
+    this.scene.floatText(this.front.x, this.front.y - 20, this.rally ? 'WAKE UP! OUTSIDERS!' : 'KNOCK KNOCK!', '#ffe066');
     this.scene.onKnock(this);
     return true;
   }
@@ -48,10 +51,16 @@ export class Door {
   open(time) {
     const s = this.scene;
     this.state = 'open';
+    if (this.rally && s.gang.active) {
+      this.light.setAlpha(1).setFillStyle(0x06d6a0);
+      s.gang.addRebel(this);
+      this.close(time);
+      return;
+    }
     this.light.setAlpha(1).setFillStyle(0xff4d4d);
     sfx.yell();
     s.floatText(this.front.x, this.front.y - 30, Phaser.Utils.Array.GetRandom(YELLS), '#ff6b6b', 15);
-    if (s.hidden || Phaser.Math.Distance.Between(s.player.x, s.player.y, this.front.x, this.front.y) > 280) {
+    if (!s.nearestVisiblePlayer(this.front.x, this.front.y, 280)) {
       s.addScore(5, 'Clean getaway!', this.front.x, this.front.y - 50);
       this.close(time);
       return;
@@ -80,12 +89,13 @@ class AngryStudent extends Npc {
   update(time) {
     const s = this.scene;
     if (!this.returning) {
-      if (time > this.chaseUntil || s.hidden) {
+      const p = s.nearestVisiblePlayer(this.x, this.y);
+      if (time > this.chaseUntil || !p) {
         this.returning = true;
         this.setPathTo(this.door.frontTile.x, this.door.frontTile.y);
       } else {
-        this.chase(s.player, this.speed, time);
-        if (this.distTo(s.player) < 24 && s.hurt(`Room ${this.door.roomNo} caught you! Slipper to the face!`)) {
+        this.chase(p, this.speed, time);
+        if (this.distTo(p) < 24 && s.hurt(`Room ${this.door.roomNo} caught you! Slipper to the face!`, p)) {
           this.returning = true;
           this.setPathTo(this.door.frontTile.x, this.door.frontTile.y);
         }

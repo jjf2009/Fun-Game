@@ -1,0 +1,175 @@
+import Phaser from 'phaser';
+import { CONFIG, FONT, TITLE_FONT } from '../config.js';
+import { sfx } from '../sfx.js';
+import { Net } from '../net/Net.js';
+import { startSession, endSession, gotoScene } from '../net/session.js';
+import { isBossUnlocked } from '../storage.js';
+import { enterFullscreen } from '../mobile.js';
+
+// PLAY WITH A FRIEND: one player creates a room and shares the 4-letter code, the other joins with it.
+export default class LobbyScene extends Phaser.Scene {
+  constructor() {
+    super('Lobby');
+  }
+
+  create() {
+    endSession(this.game); // leave any old room
+    this.net = null;
+    this.input.keyboard.clearCaptures(); // let the code box receive every letter
+
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x0b0d1f, 0x0b0d1f, 0x2a1f4a, 0x2a1f4a, 1);
+    bg.fillRect(0, 0, 960, 540);
+    this.add.text(480, 55, 'PLAY WITH A FRIEND', {
+      fontFamily: TITLE_FONT, fontSize: '28px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 8,
+    }).setOrigin(0.5);
+    this.add.image(400, 130, 'face_player').setScale(0.4);
+    this.add.image(560, 130, 'face_player2').setScale(0.4);
+    this.add.text(480, 130, '+', { fontFamily: TITLE_FONT, fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
+    this.add.text(480, 200, 'You and your friend are roommates. Play on two phones or PCs.\nOne of you creates a room, the other joins with the code.', {
+      fontFamily: FONT, fontSize: '17px', color: '#caf0f8', align: 'center',
+    }).setOrigin(0.5);
+
+    this.status = this.add.text(480, 395, '', {
+      fontFamily: FONT, fontSize: '17px', color: '#ffffff', align: 'center', wordWrap: { width: 820 },
+    }).setOrigin(0.5);
+
+    this.panel = this.add.container(0, 0);
+    this.showChoice();
+
+    this.button(90, 500, 140, 44, '← MENU', 0x6c757d, () => {
+      endSession(this.game);
+      this.net?.destroy();
+      this.scene.start('Menu');
+    }, 14);
+
+    this.events.once('shutdown', () => this.removeCodeBox());
+  }
+
+  button(x, y, w, h, label, color, onTap, size = 18, parent = null) {
+    const r = this.add.rectangle(x, y, w, h, color).setStrokeStyle(4, 0x1a1020).setInteractive({ useHandCursor: true });
+    const t = this.add.text(x, y + 2, label, { fontFamily: TITLE_FONT, fontSize: `${size}px`, color: '#1a1020' }).setOrigin(0.5);
+    r.on('pointerup', () => { sfx.unlock(); onTap(); });
+    parent?.add([r, t]);
+    return [r, t];
+  }
+
+  clearPanel() {
+    this.panel.removeAll(true);
+    this.removeCodeBox();
+  }
+
+  showChoice() {
+    this.clearPanel();
+    this.status.setText('');
+    this.button(300, 300, 280, 70, 'CREATE ROOM', 0xffcc00, () => this.createRoom(), 18, this.panel);
+    this.button(660, 300, 280, 70, 'JOIN ROOM', 0x80ffdb, () => this.showJoin(), 18, this.panel);
+  }
+
+  // ---------- Host ----------
+
+  createRoom() {
+    enterFullscreen(this);
+    this.clearPanel();
+    this.status.setText('Creating room...');
+    const net = new Net();
+    this.net = net;
+    net.on('code', (code) => {
+      this.status.setText('Tell your friend this code. Waiting for them to join...');
+      const t = this.add.text(480, 305, code, {
+        fontFamily: TITLE_FONT, fontSize: '56px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 10, letterSpacing: 12,
+      }).setOrigin(0.5);
+      this.tweens.add({ targets: t, scale: 1.06, duration: 700, yoyo: true, repeat: -1 });
+      this.panel.add(t);
+    });
+    net.on('connected', () => {
+      startSession(this.game, net);
+      sfx.win();
+      this.clearPanel();
+      this.status.setText('✅ Your friend joined! Ready when you are.');
+      const bossReady = isBossUnlocked();
+      const startNight = (night) => gotoScene(this, 'NightIntro', { night, score: 0, lives: CONFIG.lives, knocks: 0 });
+      this.button(bossReady ? 330 : 480, 300, 300, 66, 'START NIGHT 1', 0xffcc00, () => startNight(1), 18, this.panel);
+      if (bossReady) this.button(680, 300, 240, 66, 'BOSS NIGHT', 0xd62828, () => startNight(CONFIG.bossNight), 16, this.panel);
+    });
+    net.on('error', (msg) => this.fail(msg));
+    net.host();
+  }
+
+  // ---------- Friend ----------
+
+  showJoin() {
+    enterFullscreen(this);
+    this.clearPanel();
+    this.status.setText('Type the 4-letter code from your friend.');
+    this.makeCodeBox();
+    this.button(480, 330, 220, 56, 'JOIN', 0x80ffdb, () => this.join(), 18, this.panel);
+  }
+
+  join() {
+    const code = (this.codeBox?.value || '').toUpperCase().replace(/[^A-Z]/g, '');
+    if (code.length !== 4) {
+      this.status.setText('The code has 4 letters.');
+      return;
+    }
+    this.clearPanel();
+    this.status.setText(`Joining room ${code}...`);
+    const net = new Net();
+    this.net = net;
+    net.on('connected', () => {
+      startSession(this.game, net);
+      sfx.win();
+      this.status.setText('✅ Connected! Waiting for your friend to start the night...');
+      this.add.image(480, 300, 'player2').setScale(2);
+    });
+    net.on('error', (msg) => this.fail(msg));
+    net.join(code);
+  }
+
+  fail(msg) {
+    this.net?.destroy();
+    this.net = null;
+    this.clearPanel();
+    this.status.setText(`⚠️ ${msg}`);
+    this.button(480, 300, 220, 56, 'TRY AGAIN', 0xffcc00, () => this.showChoice(), 16, this.panel);
+  }
+
+  // A real HTML text box on top of the game, so phones show their keyboard.
+  // It must live inside the full-screen element, or the browser hides it in full-screen mode.
+  makeCodeBox() {
+    const box = document.createElement('input');
+    Object.assign(box, { maxLength: 4, placeholder: 'CODE', autocomplete: 'off', autocapitalize: 'characters', spellcheck: false });
+    Object.assign(box.style, {
+      position: 'fixed', textAlign: 'center', fontFamily: '"Press Start 2P", monospace', textTransform: 'uppercase',
+      color: '#1a1020', background: '#fff3b0', border: '4px solid #1a1020', borderRadius: '6px', zIndex: 5,
+      userSelect: 'text', webkitUserSelect: 'text', touchAction: 'manipulation', boxSizing: 'border-box',
+    });
+    box.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.join(); });
+    this.codeBox = box;
+    this.placeCodeBox = () => {
+      const home = document.fullscreenElement ?? document.body;
+      if (box.parentElement !== home) home.appendChild(box);
+      const canvas = this.game.canvas.getBoundingClientRect();
+      const k = canvas.width / 960;
+      Object.assign(box.style, {
+        left: `${canvas.left + (480 - 110) * k}px`, top: `${canvas.top + (262 - 30) * k}px`,
+        width: `${220 * k}px`, height: `${60 * k}px`, fontSize: `${34 * k}px`,
+      });
+    };
+    this.placeCodeBox();
+    // Keep it in place when the screen changes (full screen, rotation, phone keyboard opening)
+    document.addEventListener('fullscreenchange', this.placeCodeBox);
+    this.scale.on('resize', this.placeCodeBox);
+    setTimeout(() => { this.placeCodeBox?.(); box.focus(); }, 150);
+  }
+
+  removeCodeBox() {
+    if (this.placeCodeBox) {
+      document.removeEventListener('fullscreenchange', this.placeCodeBox);
+      this.scale.off('resize', this.placeCodeBox);
+      this.placeCodeBox = null;
+    }
+    this.codeBox?.remove();
+    this.codeBox = null;
+  }
+}

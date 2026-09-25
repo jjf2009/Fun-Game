@@ -2,16 +2,18 @@ import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
 import { unlockBoss } from '../storage.js';
+import { gotoScene } from '../net/session.js';
 
 const FLAVOR = {
   old: [
-    'No full-time security yet. Seniors rule the corridors after 10 PM.',
+    'The college security guard is at the gate... fast asleep, as usual.',
+    'The guards sleep. The seniors don\'t. They rule the corridors after 10 PM.',
     'The outsider gang was spotted near the boundary wall again...',
     `Rumour: ${CONFIG.wardenName} is doing surprise checks for non-hostellers tonight.`,
     'The water tank was empty since morning. Nobody knows why.',
   ],
   security: [
-    'A security guard now sits at the main gate. The gang thinks twice.',
+    'Special security guards the gate now. They actually stay awake.',
     `The anti-ragging squad is active. But ${CONFIG.wardenName} is stricter than ever.`,
     'New rule: no guests after 9 PM. Nobody follows it.',
     'Mess food was terrible again. Everyone is awake and angry.',
@@ -40,6 +42,10 @@ export default class NightIntroScene extends Phaser.Scene {
       this.bossCard();
       return;
     }
+    if (firstSecurityNight) {
+      this.storyCard();
+      return;
+    }
     this.add.text(480, 110, `NIGHT ${night}`, {
       fontFamily: TITLE_FONT, fontSize: '52px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 10,
     }).setOrigin(0.5).setShadow(4, 4, '#000', 0, true, true);
@@ -51,12 +57,10 @@ export default class NightIntroScene extends Phaser.Scene {
       this.add.image(x, 360, key).setScale(0.44);
     });
 
-    const eraTitle = era === 'old'
-      ? 'THE OLD DAYS · No full-time security'
-      : firstSecurityNight ? 'A NEW ERA · Security has arrived!' : 'THE SECURITY ERA';
+    const eraTitle = era === 'old' ? 'THE OLD DAYS · The guards sleep, the seniors rule' : 'THE SECURITY ERA';
     this.add.text(480, 185, eraTitle, { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: era === 'old' ? '#ff8fa3' : '#90e0ef' }).setOrigin(0.5);
 
-    const flavor = firstSecurityNight ? FLAVOR.security[0] : Phaser.Utils.Array.GetRandom(FLAVOR[era]);
+    const flavor = night === 1 ? FLAVOR.old[0] : Phaser.Utils.Array.GetRandom(FLAVOR[era]);
     this.add.text(480, 240, `"${flavor}"`, {
       fontFamily: FONT, fontSize: '19px', color: '#ffffff', align: 'center', wordWrap: { width: 760 },
     }).setOrigin(0.5);
@@ -70,7 +74,39 @@ export default class NightIntroScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.tweens.add({ targets: tap, alpha: 0.3, duration: 600, yoyo: true, repeat: -1 });
 
-    this.waitForStart();
+    this.waitForStart(tap);
+  }
+
+  // Night 4: why special security came to the hostel. Told plainly, not as a joke.
+  storyCard() {
+    this.add.text(480, 56, 'WHAT CHANGED', {
+      fontFamily: TITLE_FONT, fontSize: '26px', color: '#caf0f8', stroke: '#000', strokeThickness: 6,
+    }).setOrigin(0.5);
+    const story = [
+      'Back then, the college security guards slept through the night.',
+      'With nobody watching, the seniors did whatever they wanted.',
+      '',
+      'Then one night, after an event, a junior was dragged out',
+      'of the hostel and beaten up by seniors.',
+      '',
+      'After that, the college finally brought in SPECIAL SECURITY.',
+    ];
+    this.add.text(480, 205, story.join('\n'), {
+      fontFamily: FONT, fontSize: '20px', color: '#ffffff', align: 'center', lineSpacing: 6,
+    }).setOrigin(0.5);
+    this.add.image(480, 345, 'guard').setScale(2.2);
+    this.add.text(480, 388, `NIGHT ${this.data_.night} · A NEW ERA`, { fontFamily: TITLE_FONT, fontSize: '16px', color: '#90e0ef' }).setOrigin(0.5);
+    this.add.text(480, 414, 'Ragging is a crime. If it happens to you or a friend, report it:', {
+      fontFamily: FONT, fontSize: '15px', color: '#ffd166', align: 'center',
+    }).setOrigin(0.5);
+    this.add.text(480, 440, 'ANTI-RAGGING HELPLINE 1800-180-5522 (FREE)', {
+      fontFamily: TITLE_FONT, fontSize: '11px', color: '#ffd166', align: 'center',
+    }).setOrigin(0.5);
+    const tap = this.add.text(480, 485, this.sys.game.device.input.touch ? 'Tap to begin' : 'Press SPACE or click to begin', {
+      fontFamily: FONT, fontSize: '20px', color: '#adb5bd',
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: tap, alpha: 0.3, duration: 600, yoyo: true, repeat: -1 });
+    this.waitForStart(tap);
   }
 
   // The finale: the outsider gang's boss arrives on 3 bikes.
@@ -117,16 +153,22 @@ export default class NightIntroScene extends Phaser.Scene {
       fontFamily: FONT, fontSize: '20px', color: '#ffd166',
     }).setOrigin(0.5);
     this.tweens.add({ targets: tap, alpha: 0.3, duration: 600, yoyo: true, repeat: -1 });
-    this.waitForStart();
+    this.waitForStart(tap);
   }
 
-  waitForStart() {
+  waitForStart(tap) {
     this.cameras.main.fadeIn(400);
+    // Co-op friend: the host decides when the night starts
+    if (this.data_.mp === 'guest') {
+      tap.setText('Waiting for your friend to start...');
+      return;
+    }
     this.started = false;
     const go = () => {
       if (this.started) return;
       this.started = true;
-      this.scene.start('Game', this.data_);
+      const { mp, ...data } = this.data_;
+      gotoScene(this, 'Game', data);
     };
     // Small delay so a tap from the previous screen doesn't skip this card.
     this.time.delayedCall(500, () => {

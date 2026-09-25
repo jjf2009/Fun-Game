@@ -10,10 +10,13 @@ import UIScene from './scenes/UIScene.js';
 import RaggingScene from './scenes/RaggingScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
 import VictoryScene from './scenes/VictoryScene.js';
+import LobbyScene from './scenes/LobbyScene.js';
 
 function startGame() {
+  // ?renderer=canvas forces the simpler canvas renderer (handy for slow devices and automated tests)
+  const renderer = new URLSearchParams(window.location.search).get('renderer') === 'canvas' ? Phaser.CANVAS : Phaser.AUTO;
   const game = new Phaser.Game({
-    type: Phaser.AUTO,
+    type: renderer,
     parent: 'game',
     width: 960,
     height: 540,
@@ -22,7 +25,7 @@ function startGame() {
     physics: { default: 'arcade', arcade: { debug: false } },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },
-    scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene, VictoryScene],
+    scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene, VictoryScene, LobbyScene],
   });
   // Handy for debugging in the browser console.
   window.game = game;

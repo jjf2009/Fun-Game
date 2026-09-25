@@ -4,6 +4,7 @@ import { sfx } from '../sfx.js';
 import { getBest, isBossUnlocked } from '../storage.js';
 import { rng } from '../art/pixels.js';
 import { enterFullscreen, addFullscreenButton, isIOS, isStandalone } from '../mobile.js';
+import { endSession } from '../net/session.js';
 
 const CAST = [
   ['face_player', 'YOU', '#9bf6ff'],
@@ -18,8 +19,13 @@ export default class MenuScene extends Phaser.Scene {
     super('Menu');
   }
 
+  init(data) {
+    this.toast = data?.toast;
+  }
+
   create() {
     const cx = 480;
+    endSession(this.game); // coming back to the menu leaves any co-op room
     this.drawSkyline();
 
     const title = this.add.text(cx, 62, CONFIG.gameTitle, {
@@ -43,7 +49,7 @@ export default class MenuScene extends Phaser.Scene {
     const how = [
       'Knock on doors & RUN  ·  Stay out of the torchlight',
       `Warden check? Sneak ${CONFIG.guestName} out to the gate`,
-      'Gang bombs? Dodge the red circles & ring the bell',
+      'Gang bombs? Call the POLICE or start a REBELLION!',
       'Escape the seniors  ·  Stay fresh, even in a water cut',
       `Survive ${CONFIG.bossNight - 1} nights, then face ${CONFIG.bossName} on BOSS NIGHT!`,
     ];
@@ -60,10 +66,21 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const bossUnlocked = isBossUnlocked();
-    const bx = bossUnlocked ? cx - 130 : cx;
-    const btn = this.add.rectangle(bx, 462, 330, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
-    const label = this.add.text(bx, 464, 'START NIGHT 1', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
+    const btn = this.add.rectangle(cx - 165, 462, 300, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
+    const label = this.add.text(cx - 165, 464, 'START NIGHT 1', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#1a1020' }).setOrigin(0.5);
     this.tweens.add({ targets: [btn, label], scale: 1.05, duration: 600, yoyo: true, repeat: -1 });
+    const coop = this.add.rectangle(cx + 165, 462, 300, 56, 0x80ffdb).setStrokeStyle(4, 0x1a1020).setInteractive({ useHandCursor: true });
+    this.add.text(cx + 165, 464, '👥 WITH A FRIEND', { fontFamily: TITLE_FONT, fontSize: '14px', color: '#1a1020' }).setOrigin(0.5);
+    coop.on('pointerup', () => {
+      sfx.unlock();
+      this.scene.start('Lobby');
+    });
+    if (this.toast) {
+      const t = this.add.text(cx, 142, this.toast, {
+        fontFamily: FONT, fontSize: '16px', color: '#ffffff', backgroundColor: '#d62828', padding: { x: 10, y: 5 },
+      }).setOrigin(0.5).setDepth(10);
+      this.tweens.add({ targets: t, alpha: 0, delay: 3500, duration: 800 });
+    }
 
     const best = getBest();
     if (best > 0) this.add.text(cx, 515, `BEST SCORE: ${best}`, { fontFamily: FONT, fontSize: '16px', color: '#80ffdb', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5);
@@ -80,8 +97,8 @@ export default class MenuScene extends Phaser.Scene {
 
     // Replay the finale once you've reached it
     if (bossUnlocked) {
-      const bossBtn = this.add.rectangle(cx + 190, 462, 220, 56, 0xd62828).setStrokeStyle(4, 0x2a0008).setInteractive({ useHandCursor: true });
-      this.add.text(cx + 190, 464, 'BOSS NIGHT', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
+      const bossBtn = this.add.rectangle(870, 516, 160, 36, 0xd62828).setStrokeStyle(3, 0x2a0008).setInteractive({ useHandCursor: true });
+      this.add.text(870, 517, 'BOSS NIGHT', { fontFamily: TITLE_FONT, fontSize: '11px', color: '#ffffff' }).setOrigin(0.5);
       bossBtn.on('pointerup', () => {
         enterFullscreen(this);
         sfx.unlock();

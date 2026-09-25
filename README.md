@@ -20,13 +20,26 @@ Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 |---|---|
 | 🚪 **Knock & run** | Press **SPACE** (or **ACT**) near a door. It opens in ~2 seconds, so RUN. Knock quickly one after another for a combo (up to x5). |
 | 🔦 **Warden** | Patrols with a flashlight. If you step into the light, the warden chases you. Break line of sight or hide in your room. |
-| 🚨 **Warden check** | Your friend is in your room! Go to your door, press ACT, and lead them to the **main gate** without the flashlight seeing them. |
-| 💣 **Outsider gang** | They throw bombs over the wall. Red circles show where each one will land. Ring the **alarm bell** by the gate to scare them off. |
-| 😈 **Seniors** | Roam in the Old Days (Nights 1–3). If one catches you, do their silly task (push-ups, anthem, intro) fast or lose a life. |
+| 🚨 **Warden check** | Once per night, your friend Bunty is in your room! Go to your door, press ACT, and lead them to the **main gate** without the flashlight seeing them. |
+| 💣 **Outsider gang** | They throw bombs over the wall. Red circles show where each one will land. Fight back two ways:<br>📞 **Call the police** from the phone box by the gate. The jeep arrives a few seconds later.<br>✊ **Rebellion:** knock on doors to wake students up (they join you instead of chasing you). Gather 4 rebels, lead them to the main gate, press ACT and charge! |
+| 😈 **Seniors** | Roam in the Old Days (Nights 1–3). If one catches you, do their silly task (push-ups, anthem, intro) fast or lose a life. Afterwards **all** seniors leave you alone for 12 seconds. |
 | 🚿 **Freshness** | Drains over time. Refill at the bathroom taps. During a **water cut**, find the water bucket. |
-| 🛏️ **Hide** | Press ACT at your own door to hide for a few seconds. |
+| 🛏️ **Hide** | Two hiding spots, always available: **your room** and the **bathroom stall**. Press ACT there to hide for up to 7 seconds. |
 
-Each night runs from 11 PM to 5 AM (~2.5 minutes). Survive to earn a bonus and one life back. From Night 4, **security arrives**: fewer gang attacks and fewer seniors, but a stricter warden.
+Each night runs from 11 PM to 5 AM (~2.5 minutes). Survive to earn a bonus and one life back.
+
+**The story:** in the Old Days (Nights 1–3) the college security guard sleeps at the gate, so the seniors do whatever they want. Night 4 explains what changed: after an event, a junior was dragged out of the hostel and beaten up by seniors, and the college finally brought in **special security**. From then on there are fewer gang attacks and fewer seniors, but a stricter warden.
+
+> Ragging is a crime. If it happens to you or a friend, report it: **National Anti-Ragging Helpline 1800-180-5522** (toll free).
+
+## 👥 Play with a friend (online co-op)
+
+1. Both open the game (phone or PC) and tap **WITH A FRIEND**.
+2. One of you taps **CREATE ROOM** and reads out the 4-letter code.
+3. The other taps **JOIN ROOM** and types the code.
+4. The host taps **START NIGHT 1**. You're roommates: lives and score are shared.
+
+Tips: co-op connects the two devices directly (peer-to-peer, using the free PeerJS service), so no game server is needed. Some college Wi-Fi networks block it; if it won't connect, try mobile data. If a senior catches one of you, only that player does the task, and the other keeps playing.
 
 ### 🏍️ Boss Night (Night 5, the finale)
 
@@ -92,6 +105,7 @@ src/
   objects/             characters: Warden, Senior, Door (+ angry student), Npc (shared base)
   systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting
   art/                 pixel-art generator + DiceBear portraits
+  net/                 online co-op: Net (PeerJS), HostNet (host streams the game), GuestMirror (friend's view), session
   sfx.js               sound effects generated in code
 ```
 

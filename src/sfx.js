@@ -90,6 +90,38 @@ export const sfx = {
     tone(120, 0.25, { type: 'sine', vol: 0.4, slideTo: 50 });
     noise(0.15, 0.25);
   },
+  phone() {
+    for (let i = 0; i < 2; i++) {
+      tone(1400, 0.35, { type: 'sine', vol: 0.06, delay: i * 0.6 });
+      tone(1750, 0.35, { type: 'sine', vol: 0.05, delay: i * 0.6 });
+    }
+  },
+  siren() {
+    for (let i = 0; i < 3; i++) {
+      tone(700, 0.45, { type: 'sine', vol: 0.07, slideTo: 1300, delay: i * 0.9 });
+      tone(1300, 0.45, { type: 'sine', vol: 0.07, slideTo: 700, delay: i * 0.9 + 0.45 });
+    }
+  },
+  cheer() {
+    noise(0.8, 0.15);
+    [300, 400, 500, 650].forEach((f, i) => tone(f, 0.25, { type: 'sawtooth', vol: 0.04, delay: i * 0.08 }));
+  },
+  pow() {
+    noise(0.12, 0.3);
+    tone(160, 0.12, { type: 'square', vol: 0.12, slideTo: 60 });
+  },
   win() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.18, { vol: 0.06, delay: i * 0.12 })); },
   fail() { [400, 300, 200].forEach((f, i) => tone(f, 0.2, { type: 'sawtooth', vol: 0.06, delay: i * 0.15 })); },
 };
+
+// Multiplayer: the host sets sfx.onPlay so every sound is also sent to the friend's device.
+sfx.onPlay = null;
+for (const key of Object.keys(sfx)) {
+  const desc = Object.getOwnPropertyDescriptor(sfx, key);
+  if (typeof desc.value !== 'function' || ['unlock', 'toggleMute'].includes(key)) continue;
+  const play = desc.value;
+  sfx[key] = (...args) => {
+    sfx.onPlay?.(key, args);
+    return play(...args);
+  };
+}

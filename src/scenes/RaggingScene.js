@@ -18,6 +18,7 @@ export default class RaggingScene extends Phaser.Scene {
 
   init(data) {
     this.onDone = data.onDone;
+    this.face = data.face ?? 'face_player';
     this.night = data.night ?? 1;
   }
 
@@ -35,7 +36,7 @@ export default class RaggingScene extends Phaser.Scene {
     this.seniorImg = this.add.image(210, 200, 'face_senior').setScale(0.72);
     this.add.text(210, 290, 'SENIOR', { fontFamily: FONT, fontSize: '16px', color: '#ff8fa3', fontStyle: 'bold' }).setOrigin(0.5);
     this.tweens.add({ targets: this.seniorImg, angle: { from: -3, to: 3 }, duration: 400, yoyo: true, repeat: -1 });
-    this.playerImg = this.add.image(210, 385, 'face_player').setScale(0.42);
+    this.playerImg = this.add.image(210, 385, this.face).setScale(0.42);
 
     this.speech = this.add.text(320, 120, '', {
       fontFamily: FONT, fontSize: '19px', color: '#ffffff', wordWrap: { width: 480 },

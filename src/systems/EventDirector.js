@@ -28,7 +28,7 @@ export class EventDirector {
     const w = WEIGHTS[s.era];
     const options = [];
     if (!s.gang.active) options.push(['gang', w.gang]);
-    if (!s.raid.active && s.timeLeft > 15) options.push(['raid', w.raid]);
+    if (!s.raid.active && !s.raid.used && s.timeLeft > 15) options.push(['raid', w.raid]); // Bunty: once per night
     if (!s.water.cut) options.push(['water', w.water]);
     if (!options.length) return;
 

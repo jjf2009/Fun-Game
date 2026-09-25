@@ -67,6 +67,7 @@ const outline = (set, get, w, h) => {
 
 export const PEOPLE = {
   player: { shirt: '#3a86ff', skin: '#e0ac69', hair: '#2b1b12' },
+  player2: { shirt: '#ff5d8f', skin: '#c68642', hair: '#1a1a1a' }, // your friend in co-op
   warden: { shirt: '#8d6e3f', skin: '#c68642', hair: '#1d1d1d', cap: '#1d3557', size: 1.1 },
   senior: { shirt: '#d62828', skin: '#c68642', hair: '#111111', shades: true },
   gang: { shirt: '#262626', skin: '#8d5524', hair: '#111111', bandana: '#e63946' },
@@ -249,13 +250,27 @@ export function propCanvases() {
     set(2, 2, '#adb5bd'); set(11, 2, '#adb5bd'); set(2, 3, '#adb5bd'); set(11, 3, '#adb5bd');
     outline(set, get, 14, 14);
   });
-  props.bell = pixelCanvas(12, 14, 2, (set, get) => {
-    for (let y = 0; y < 3; y++) set(6, y, '#6c584c');
-    for (let y = 3; y < 11; y++) for (let x = 6 - (y - 2) / 2; x <= 6 + (y - 2) / 2; x++) set(x, y, y < 6 ? '#ffe066' : '#f4d35e');
-    for (let x = 1; x <= 11; x++) set(x, 11, '#c9a227');
-    set(6, 12, '#6c584c');
-    set(5, 5, '#fff3b0');
-    outline(set, get, 12, 14);
+  props.phone = pixelCanvas(12, 18, 2, (set, get) => {
+    for (let y = 3; y < 17; y++) for (let x = 1; x < 11; x++) set(x, y, '#1d3557');
+    for (let y = 5; y < 10; y++) for (let x = 3; x < 9; x++) set(x, y, '#e9ecef'); // sign
+    for (let x = 4; x < 8; x++) set(x, 7, '#e63946');
+    for (let y = 11; y < 15; y++) for (let x = 3; x < 9; x++) set(x, y, '#457b9d');
+    set(5, 12, '#111111'); set(6, 12, '#111111'); set(5, 13, '#111111'); // receiver
+    for (let x = 3; x < 9; x++) set(x, 2, '#adb5bd');
+    set(5, 0, '#e63946'); set(6, 0, '#e63946'); set(5, 1, '#e63946'); set(6, 1, '#e63946'); // light
+    outline(set, get, 12, 18);
+  });
+  // Police jeep, top-down, facing RIGHT
+  props.police = pixelCanvas(40, 22, 2, (set, get) => {
+    for (const [wx, wy] of [[6, 1], [30, 1], [6, 18], [30, 18]]) for (let x = 0; x < 6; x++) for (let y = 0; y < 3; y++) set(wx + x, wy + y, '#111111');
+    for (let x = 2; x < 38; x++) for (let y = 3; y < 19; y++) set(x, y, '#f8f9fa');
+    for (let x = 2; x < 38; x++) { set(x, 10, '#1d4ed8'); set(x, 11, '#1d4ed8'); }
+    for (let x = 25; x < 31; x++) for (let y = 5; y < 17; y++) set(x, y, '#1b263b'); // windscreen
+    for (let x = 8; x < 13; x++) for (let y = 5; y < 17; y++) set(x, y, '#1b263b'); // rear window
+    for (let y = 5; y < 11; y++) { set(18, y, '#e63946'); set(19, y, '#e63946'); } // light bar
+    for (let y = 11; y < 17; y++) { set(18, y, '#3a86ff'); set(19, y, '#3a86ff'); }
+    set(37, 5, '#fff3b0'); set(37, 16, '#fff3b0');
+    outline(set, get, 40, 22);
   });
   props.tap = pixelCanvas(8, 6, 2, (set) => {
     for (let x = 0; x < 8; x++) set(x, 2, '#adb5bd');

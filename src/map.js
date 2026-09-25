@@ -2,7 +2,7 @@
 //
 //  cols 0-3   : outside road (where the outsider gang stands)
 //  col  4     : boundary wall with the main gate
-//  cols 5-10  : courtyard (alarm bell next to the gate)
+//  cols 5-10  : courtyard (police phone box next to the gate)
 //  cols 11-12 : lobby connecting both corridors
 //  cols 13-36 : 4 rows of 8 rooms, two corridors between them
 //  cols 37-38 : bathroom with water taps on the right wall
@@ -62,7 +62,7 @@ export function buildMap(myRoom) {
   return {
     grid,
     doors,
-    bell: tileCenter(5, 9),
+    phone: tileCenter(5, 9),
     tap: { x: 39 * TILE, y: 12 * TILE },
     gate: tileCenter(4, 12),
   };

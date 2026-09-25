@@ -75,10 +75,12 @@ export class Warden extends Npc {
       return;
     }
     const s = this.scene;
-    const p = s.player;
     const st = this.stats;
 
-    if (!s.hidden && time > this.ignoreUntil && this.canSee(p.x, p.y)) {
+    // Spot any player standing in the torchlight
+    const seen = time > this.ignoreUntil ? s.visiblePlayers().find((pl) => this.canSee(pl.x, pl.y)) : null;
+    if (seen) {
+      this.targetPlayer = seen;
       if (this.state !== 'chase') {
         this.state = 'chase';
         sfx.whistle();
@@ -87,13 +89,14 @@ export class Warden extends Npc {
       this.lastSeen = time;
     }
 
+    const p = this.targetPlayer;
     if (this.state === 'chase') {
-      if (s.hidden || time - this.lastSeen > CONFIG.warden.giveUp) {
+      if (!p?.active || p.hidden || p.frozen || time - this.lastSeen > CONFIG.warden.giveUp) {
         this.state = 'patrol';
         this.pickPatrol();
       } else {
         this.chase(p, st.chase, time);
-        if (this.distTo(p) < 26 && s.hurt(`${CONFIG.wardenName} caught you roaming after curfew!`)) {
+        if (this.distTo(p) < 26 && s.hurt(`${CONFIG.wardenName} caught you roaming after curfew!`, p)) {
           this.ignoreUntil = time + 3500;
           this.state = 'patrol';
           this.pickPatrol();

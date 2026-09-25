@@ -8,13 +8,15 @@ export class RaidSystem {
   constructor(scene) {
     this.scene = scene;
     this.active = false;
+    this.used = false; // Bunty only sneaks in once per night
     this.guest = null;
   }
 
   start() {
     const s = this.scene;
     const duration = Math.min(CONFIG.raidDuration, s.timeLeft - 3);
-    if (duration < 12) return false;
+    if (duration < 12 || this.used) return false;
+    this.used = true;
     this.active = true;
     this.timeLeft = duration;
     this.state = 'inRoom';
@@ -28,10 +30,11 @@ export class RaidSystem {
     return true;
   }
 
-  releaseGuest() {
+  releaseGuest(p) {
     const s = this.scene;
     if (this.state !== 'inRoom') return;
     this.state = 'follow';
+    this.leader = p; // Bunty follows whoever got him out
     this.marker.destroy();
     this.trail = [];
     this.guest = s.physics.add.sprite(s.myDoor.front.x, s.myDoor.front.y + (s.myDoor.frontTile.y > s.myDoor.front.y ? 10 : -10), 'guest').setDepth(5);
@@ -49,7 +52,7 @@ export class RaidSystem {
 
     if (this.state === 'follow') {
       // The friend follows your footsteps (a trail of your past positions).
-      const p = s.player;
+      const p = this.leader;
       const last = this.trail[this.trail.length - 1];
       if (!last || Phaser.Math.Distance.Between(last.x, last.y, p.x, p.y) > 4) this.trail.push({ x: p.x, y: p.y });
       if (this.trail.length > 60) this.trail.shift();
@@ -72,14 +75,14 @@ export class RaidSystem {
         return;
       }
       if (s.warden.canSee(this.guest.x, this.guest.y)) {
-        s.hurt(`🚨 Caught with a non-hosteller! ₹500 fine!`);
+        s.hurt(`🚨 Caught with a non-hosteller! ₹500 fine!`, this.leader);
         this.end(`${CONFIG.guestName} was sent home by ${CONFIG.wardenName}.`, '#ff6b6b');
         return;
       }
     }
 
     if (this.timeLeft <= 0) {
-      s.hurt(`🚨 ${CONFIG.wardenName} found ${CONFIG.guestName} with you!`);
+      s.hurt(`🚨 ${CONFIG.wardenName} found ${CONFIG.guestName} with you!`, this.leader ?? s.players[0]);
       this.end('The warden check is over.', '#ff6b6b');
     }
   }
