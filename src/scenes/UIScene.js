@@ -104,54 +104,34 @@ export default class UIScene extends Phaser.Scene {
 
   update() {
     const g = this.gs;
-    if (!g || !g.player) return;
+    const h = g?.hud?.();
+    if (!h) return; // co-op friend: waiting for the first update from the host
 
-    const era = g.era === 'old' ? 'The Old Days' : 'Security Era';
-    this.nightText.setText(`NIGHT ${g.night} · ${era}`);
-    this.scoreText.setText(`SCORE ${g.score}`);
-    this.hearts.forEach((h, i) => h.setTexture(i < g.lives ? 'heart' : 'heartEmpty'));
-    if (g.lives !== this.lastLives) {
-      if (this.lastLives !== undefined && g.lives < this.lastLives) this.tweens.add({ targets: this.hearts, scale: 1.6, duration: 120, yoyo: true });
-      this.lastLives = g.lives;
+    const era = h.era === 'old' ? 'The Old Days' : 'Security Era';
+    this.nightText.setText(h.bossNight ? 'FINAL NIGHT · Save the hostel!' : `NIGHT ${h.night} · ${era}${g.mp ? ' · CO-OP' : ''}`);
+    this.scoreText.setText(`SCORE ${h.score}`);
+    this.hearts.forEach((heart, i) => heart.setTexture(i < h.lives ? 'heart' : 'heartEmpty'));
+    if (h.lives !== this.lastLives) {
+      if (this.lastLives !== undefined && h.lives < this.lastLives) this.tweens.add({ targets: this.hearts, scale: 1.6, duration: 120, yoyo: true });
+      this.lastLives = h.lives;
     }
 
     // In-game clock: 11:00 PM -> 5:00 AM
-    const elapsed = CONFIG.nightLength - Math.max(0, g.timeLeft);
+    const elapsed = CONFIG.nightLength - Math.max(0, h.timeLeft);
     const mins = 23 * 60 + (elapsed / CONFIG.nightLength) * 360;
     const h24 = Math.floor(mins / 60) % 24;
     const m = Math.floor(mins % 60);
     const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-    this.clockText.setText(g.bossNight ? '🏍️ BOSS NIGHT' : `🌙 ${h12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`);
-    if (g.bossNight) this.nightText.setText('FINAL NIGHT · Save the hostel!');
+    this.clockText.setText(h.bossNight ? '🏍️ BOSS NIGHT' : `🌙 ${h12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`);
 
-    const f = Phaser.Math.Clamp(g.water.freshness, 0, 100) / 100;
+    const f = Phaser.Math.Clamp(h.fresh, 0, 100) / 100;
     this.freshBar.width = 150 * f;
     this.freshBar.setFillStyle(f > 0.5 ? 0x4cc9f0 : f > 0.25 ? 0xffd166 : 0xff4d4d);
-    this.comboText.setText(g.combo > 1 ? `COMBO x${g.combo}` : '');
-
-    const status = [];
-    if (g.bossFight) {
-      // Complaint progress for each bike: filled boxes = proof filed, half = photos carried
-      for (const bk of g.bossFight.bikes) {
-        const done = bk.state === 'suspended' || bk.state === 'gone';
-        const boxes = '■'.repeat(Math.min(bk.proof, bk.need)) + '▣'.repeat(Math.min(bk.carried, bk.need - bk.proof)) + '□'.repeat(Math.max(0, bk.need - bk.proof - bk.carried));
-        status.push(done ? `${bk.name}  ✅ SUSPENDED` : `${bk.name}  ${boxes}`);
-      }
-      status.push(`📸 Photos in phone: ${g.bossFight.carried}`);
-      if (g.bossFight.rage) status.push(`😡 ${CONFIG.bossName} IS FURIOUS`);
-    }
-    if (g.raid.active) {
-      status.push(`🚨 WARDEN CHECK ${Math.ceil(g.raid.timeLeft)}s`);
-      status.push(g.raid.state === 'inRoom' ? `Get ${CONFIG.guestName} out of room ${CONFIG.myRoom}` : `Take ${CONFIG.guestName} to the MAIN GATE`);
-    }
-    if (g.gang.active) status.push('💣 GANG ATTACK: ring the bell at the gate');
-    const breakLeft = Math.ceil((g.seniorBreakUntil - g.now) / 1000);
-    if (breakLeft > 0 && g.seniors.length) status.push(`😇 Seniors off your back: ${breakLeft}s`);
-    if (g.water.cut) status.push(`🚱 WATER CUT ${Math.ceil(g.water.timeLeft)}s`);
-    if (g.water.freshness < 30 && !g.water.cut) status.push('Freshness low! Go to the bathroom');
-    this.statusText.setText(status.join('\n'));
+    this.comboText.setText(h.combo > 1 ? `COMBO x${h.combo}` : '');
+    this.statusText.setText(h.status.join('\n'));
 
     const key = this.isTouch ? 'ACT' : 'SPACE';
-    this.hintText.setText(g.hint ? (g.hidden ? g.hint : `[${key}] ${g.hint}`) : '').setVisible(!!g.hint);
+    const plain = h.hidden || h.frozen || h.hint.endsWith('...') || h.hint.startsWith('Need');
+    this.hintText.setText(h.hint ? (plain ? h.hint : `[${key}] ${h.hint}`) : '').setVisible(!!h.hint);
   }
 }

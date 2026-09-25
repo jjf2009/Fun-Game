@@ -19,27 +19,39 @@ export class Senior extends Npc {
 
   update(time) {
     const s = this.scene;
-    const p = s.player;
     const n = s.night;
     const wanderSpeed = 60 + n * 4;
     const chaseSpeed = Math.min(120 + n * 6, 160);
 
-    const onBreak = time < s.seniorBreakUntil;
-    const canSee = !s.hidden && !onBreak && time > this.cooldownUntil && this.distTo(p) < 150
-      && hasLineOfSight(this.x, this.y, p.x, p.y);
-    if (canSee) {
+    // Holding a player who is doing a ragging task (co-op: the game keeps running)
+    if (this.holding) {
+      if (this.holding.frozen) {
+        this.setVelocity(0, 0);
+        return;
+      }
+      this.holding = null;
+    }
+
+    // Players this senior can pick on: visible, and not on a "senior break"
+    const targets = s.visiblePlayers().filter((pl) => time > pl.seniorBreakUntil);
+    const seen = time > this.cooldownUntil
+      ? targets.find((pl) => this.distTo(pl) < 150 && hasLineOfSight(this.x, this.y, pl.x, pl.y))
+      : null;
+    if (seen) {
       if (this.state !== 'chase') s.floatText(this.x, this.y - 40, 'OYE FRESHER! COME HERE!', '#ff8fa3');
       this.state = 'chase';
+      this.target = seen;
       this.lastSeen = time;
     }
 
     if (this.state === 'chase') {
-      if (s.hidden || onBreak || time - this.lastSeen > 2500) {
+      const p = this.target;
+      if (!p?.active || !targets.includes(p) || time - this.lastSeen > 2500) {
         this.state = 'wander';
         this.wander();
       } else {
         this.chase(p, chaseSpeed, time);
-        if (this.distTo(p) < 26 && time > s.invulnUntil && time > s.seniorBreakUntil) s.startRagging(this);
+        if (this.distTo(p) < 26 && time > p.invulnUntil) s.startRagging(this, p);
       }
     } else if (this.moveAlong(wanderSpeed)) {
       this.wander();
@@ -47,6 +59,7 @@ export class Senior extends Npc {
   }
 
   letGo(time) {
+    this.holding = null;
     this.cooldownUntil = time + 8000;
     this.state = 'wander';
     this.wander();

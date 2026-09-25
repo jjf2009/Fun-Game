@@ -5,6 +5,7 @@ import * as pixelArt from '@dicebear/pixel-art';
 
 export const PORTRAITS = {
   face_player: { seed: 'you', hair: ['short05'], hairColor: ['28150a'], clothingColor: ['428bca'], skinColor: ['e0b687'], mouth: ['happy09'], glassesProbability: 0, beardProbability: 0, hatProbability: 0 },
+  face_player2: { seed: 'friend', hair: ['short15'], hairColor: ['28150a'], clothingColor: ['ff6f69'], skinColor: ['cb9e6e'], mouth: ['happy05'], glassesProbability: 0, beardProbability: 0, hatProbability: 0 },
   face_warden: {
     seed: 'warden', hair: ['short11'], hairColor: ['28150a'], clothingColor: ['03396c'], skinColor: ['cb9e6e'], mouth: ['sad03'],
     glasses: ['light02'], glassesProbability: 100, beard: ['variant03'], beardProbability: 100, hat: ['variant04'], hatColor: ['2663a3'], hatProbability: 100,

@@ -34,9 +34,34 @@ export class Lighting {
 
   flash(x, y, r, duration) {
     this.flashes.push({ x, y, r, start: this.scene.game.loop.time, duration });
+    this.scene.netEvent?.({ k: 'lf', x, y, r, duration }); // co-op: flash on the friend's screen too
   }
 
-  update(time) {
+  // All moving lights, as plain data (so the host can send them to the friend's device):
+  //   players: [[x, y, radius, alpha]], cone: {x, y, f, range} | null, points: [[x, y, radius, alpha]]
+  static sourcesFrom(s, time) {
+    const players = s.players.filter((p) => p.active).map((p) => [p.x, p.y, p.local ? 120 : 95, 0.9]);
+    const w = s.warden;
+    const cone = w?.active && !w.stationed ? { x: w.x, y: w.y, f: w.facing, range: w.stats.range, chase: w.state === 'chase' } : null;
+    const points = [];
+    if (w?.active) points.push([w.x, w.y, 40, 0.6]);
+    if (s.bossFight) {
+      points.push([s.bossFight.desk.x, s.bossFight.desk.y, 110, 0.9]);
+      for (const bk of s.bossFight.bikes) {
+        if (!bk.sprite) continue;
+        const a = bk.sprite.rotation; // headlight in the direction of travel
+        points.push([bk.sprite.x + Math.cos(a) * 60, bk.sprite.y + Math.sin(a) * 60, 70, 0.8]);
+        points.push([bk.sprite.x, bk.sprite.y, 55, 0.7]);
+      }
+    }
+    if (s.water.bucket) points.push([s.water.bucket.x, s.water.bucket.y, 60 + Math.sin(time / 150) * 10, 0.9]);
+    if (s.gang.active) points.push([s.map.phone.x, s.map.phone.y, 70 + Math.sin(time / 100) * 15, 1]);
+    if (s.gang.jeep) points.push([s.gang.jeep.x, s.gang.jeep.y, 110, 1]);
+    if (s.raid.guest) points.push([s.raid.guest.x, s.raid.guest.y, 50, 0.6]);
+    return { players, cone, points };
+  }
+
+  update(time, src) {
     const s = this.scene;
     const cam = s.cameras.main;
     const ox = cam.scrollX;
@@ -62,30 +87,15 @@ export class Lighting {
       erase(l.x, l.y, l.r, a);
     }
 
-    erase(s.player.x, s.player.y, 120, 0.9);
+    for (const [x, y, r, a] of src.players) erase(x, y, r, a);
+    for (const [x, y, r, a] of src.points) erase(x, y, r, a);
 
     // Warden torch
-    const w = s.warden;
-    if (w?.active && !w.stationed) {
-      const range = w.stats.range;
-      this.cone.setRotation(w.facing).setScale((range * 1.15) / 256).setAlpha(1);
-      this.rt.erase(this.cone, w.x - ox, w.y - oy);
-      erase(w.x, w.y, 40, 0.6);
+    if (src.cone) {
+      const c = src.cone;
+      this.cone.setRotation(c.f).setScale((c.range * 1.15) / 256).setAlpha(1);
+      this.rt.erase(this.cone, c.x - ox, c.y - oy);
     }
-
-    if (s.bossFight) {
-      erase(s.bossFight.desk.x, s.bossFight.desk.y, 110, 0.9);
-      for (const bk of s.bossFight.bikes) {
-        if (!bk.sprite) continue;
-        // headlight in the direction of travel
-        const a = bk.sprite.rotation;
-        erase(bk.sprite.x + Math.cos(a) * 60, bk.sprite.y + Math.sin(a) * 60, 70, 0.8);
-        erase(bk.sprite.x, bk.sprite.y, 55, 0.7);
-      }
-    }
-    if (s.water.bucket) erase(s.water.bucket.x, s.water.bucket.y, 60 + Math.sin(time / 150) * 10, 0.9);
-    if (s.gang.active) erase(s.map.bell.x, s.map.bell.y, 70 + Math.sin(time / 100) * 15, 1);
-    if (s.raid.guest) erase(s.raid.guest.x, s.raid.guest.y, 50, 0.6);
 
     this.flashes = this.flashes.filter((f) => {
       const t = (time - f.start) / f.duration;

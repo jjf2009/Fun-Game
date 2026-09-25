@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { getBest, saveBest } from '../storage.js';
 import { shareText } from '../mobile.js';
+import { coopEndButtons } from '../net/session.js';
 
 const TITLES = [
   [0, 'Innocent Fresher'],
@@ -49,7 +50,7 @@ export default class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const again = this.add.rectangle(560, 390, 300, 60, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
-    this.add.text(560, 392, 'PLAY AGAIN', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
+    const againLabel = this.add.text(560, 392, 'PLAY AGAIN', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
 
     const share = this.add.text(560, 460, navigator.share ? 'Share your score on WhatsApp' : 'Copy score to share on WhatsApp', {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
@@ -59,8 +60,7 @@ export default class GameOverScene extends Phaser.Scene {
       shareText(text, (msg) => share.setText(msg));
     });
 
-    const restart = () => this.scene.start('Menu');
-    again.on('pointerdown', restart);
+    const restart = coopEndButtons(this, this.result.mp, again, againLabel);
     this.time.delayedCall(600, () => this.input.keyboard.once('keydown-SPACE', restart));
   }
 }

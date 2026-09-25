@@ -3,6 +3,7 @@ import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
 import { getBest, saveBest } from '../storage.js';
 import { shareText } from '../mobile.js';
+import { coopEndButtons } from '../net/session.js';
 
 // You got the boss suspended. You win!
 export default class VictoryScene extends Phaser.Scene {
@@ -57,7 +58,7 @@ export default class VictoryScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const again = this.add.rectangle(480, 440, 300, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
-    this.add.text(480, 442, 'PLAY AGAIN', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
+    const againLabel = this.add.text(480, 442, 'PLAY AGAIN', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
 
     const share = this.add.text(480, 500, navigator.share ? 'Share your score on WhatsApp' : 'Copy score to share on WhatsApp', {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
@@ -69,8 +70,7 @@ export default class VictoryScene extends Phaser.Scene {
 
     sfx.win();
     this.time.delayedCall(700, () => sfx.win());
-    const restart = () => this.scene.start('Menu');
-    again.on('pointerdown', restart);
+    const restart = coopEndButtons(this, this.result.mp, again, againLabel);
     this.time.delayedCall(1500, () => this.input.keyboard.once('keydown-SPACE', restart));
   }
 }

@@ -21,7 +21,7 @@ export class BossFight {
       { name: 'BIKE 1', key: 'bike', lane: 45, need: b.henchmanProof, delay: 0 },
       { name: CONFIG.bossName, key: 'bike_boss', lane: 95, need: b.bossProof, boss: true, delay: 900 },
       { name: 'BIKE 2', key: 'bike', lane: 140, need: b.henchmanProof, delay: 1800 },
-    ].map((bk) => ({ ...bk, proof: 0, carried: 0, state: 'waiting', stateUntil: 0 }));
+    ].map((bk, i) => ({ ...bk, i, proof: 0, state: 'waiting', stateUntil: 0 }));
 
     // Anti-ragging desk
     scene.add.image(this.desk.x, this.desk.y - 14, 'desk').setRotation(Math.PI / 2).setDepth(4);
@@ -42,8 +42,14 @@ export class BossFight {
     scene.time.delayedCall(2000, () => sfx.engine());
   }
 
-  get carried() {
-    return this.bikes.reduce((sum, bk) => sum + bk.carried, 0);
+  // Photos live in each player's phone: p.photos[bikeIndex]
+  photosOf(p) {
+    return p.photos.reduce((a, b) => a + b, 0);
+  }
+
+  // Photos of this bike carried by the whole team (not filed yet)
+  teamCarried(bk) {
+    return this.scene.players.reduce((sum, p) => sum + (p.active ? p.photos[bk.i] : 0), 0);
   }
 
   speedOf(bk) {
@@ -123,13 +129,11 @@ export class BossFight {
 
   // ---------- Player actions ----------
 
-  nearDesk() {
-    const p = this.scene.player;
+  nearDesk(p) {
     return Phaser.Math.Distance.Between(p.x, p.y, this.desk.x, this.desk.y) < 75;
   }
 
-  photoTarget() {
-    const p = this.scene.player;
+  photoTarget(p) {
     // Prefer a stopped bike that still needs proof, then the closest one.
     let best = null;
     let bestScore = Infinity;
@@ -137,72 +141,74 @@ export class BossFight {
       if (!bk.sprite || bk.state === 'suspended' || bk.state === 'waiting') continue;
       const d = Phaser.Math.Distance.Between(p.x, p.y, bk.sprite.x, bk.sprite.y);
       if (d >= CONFIG.boss.photoRange) continue;
-      const useful = bk.state === 'stop' && bk.proof + bk.carried < bk.need;
+      const useful = bk.state === 'stop' && bk.proof + this.teamCarried(bk) < bk.need;
       const score = (useful ? 0 : 10000) + d;
       if (score < bestScore) { best = bk; bestScore = score; }
     }
     return best;
   }
 
-  hint() {
-    if (this.nearDesk()) return this.carried > 0 ? `File anti-ragging complaint (${this.carried} photo${this.carried > 1 ? 's' : ''})` : 'Bring photo proof here!';
-    const bk = this.photoTarget();
+  hint(p) {
+    const mine = this.photosOf(p);
+    if (this.nearDesk(p)) return mine > 0 ? `File anti-ragging complaint (${mine} photo${mine > 1 ? 's' : ''})` : 'Bring photo proof here!';
+    const bk = this.photoTarget(p);
     if (bk) {
       if (bk.state !== 'stop') return 'Wait for them to stop...';
-      if (bk.proof + bk.carried >= bk.need) return `Enough proof on ${bk.name}! Go file it!`;
+      if (bk.proof + this.teamCarried(bk) >= bk.need) return `Enough proof on ${bk.name}! Go file it!`;
       return `📸 Take photo of ${bk.name}`;
     }
     return null;
   }
 
   // Returns true if the action was used by the boss fight.
-  action(time) {
+  action(time, p) {
     const s = this.scene;
-    if (this.nearDesk()) {
-      this.file();
+    if (this.nearDesk(p)) {
+      this.file(p);
       return true;
     }
-    const bk = this.photoTarget();
+    const bk = this.photoTarget(p);
     if (!bk) return false;
     if (bk.state !== 'stop') {
-      s.floatText(s.player.x, s.player.y - 40, 'Too blurry! Wait till they stop', '#aaaaaa', 13);
+      s.floatText(p.x, p.y - 40, 'Too blurry! Wait till they stop', '#aaaaaa', 13);
       return true;
     }
-    if (bk.proof + bk.carried >= bk.need) {
-      s.floatText(s.player.x, s.player.y - 40, 'Enough proof! Go to the Anti-Ragging Cell', '#80ffdb', 13);
+    if (bk.proof + this.teamCarried(bk) >= bk.need) {
+      s.floatText(p.x, p.y - 40, 'Enough proof! Go to the Anti-Ragging Cell', '#80ffdb', 13);
       return true;
     }
-    if (time < this.photoCooldownUntil) return true;
-    this.photoCooldownUntil = time + 700;
-    bk.carried++;
+    if (time < (p.photoCooldownUntil ?? 0)) return true;
+    p.photoCooldownUntil = time + 700;
+    p.photos[bk.i]++;
     sfx.camera();
-    s.cameras.main.flash(120, 255, 255, 255);
-    s.lighting.flash(s.player.x, s.player.y, 220, 250);
+    s.fxFlash(p, 120, 255, 255, 255);
+    s.lighting.flash(p.x, p.y, 220, 250);
     s.floatText(bk.sprite.x + 70, bk.sprite.y - 20, `📸 PROOF +1 (${bk.name})`, '#ffffff', 15);
     return true;
   }
 
-  file() {
+  file(p) {
     const s = this.scene;
-    if (!this.carried) {
+    if (!this.photosOf(p)) {
       s.floatText(this.desk.x, this.desk.y - 60, `${CONFIG.wardenName}: "No proof, no action!"`, '#ffd166', 14);
       return;
     }
     sfx.point();
     s.floatText(this.desk.x, this.desk.y - 60, `${CONFIG.wardenName}: "Complaint registered!"`, '#ffd166', 14);
     for (const bk of this.bikes) {
-      if (!bk.carried) continue;
-      bk.proof += bk.carried;
-      s.addScore(50 * bk.carried, null, this.desk.x, this.desk.y - 30);
-      bk.carried = 0;
+      const n = p.photos[bk.i];
+      if (!n) continue;
+      bk.proof += n;
+      s.addScore(50 * n, null, this.desk.x, this.desk.y - 30);
+      p.photos[bk.i] = 0;
       if (bk.proof >= bk.need && (bk.state !== 'suspended' && bk.state !== 'gone')) this.suspend(bk);
     }
   }
 
-  dropPhotos() {
-    if (!this.carried) return;
-    for (const bk of this.bikes) bk.carried = 0;
-    this.scene.banner('📱 Your phone broke! Unfiled photos lost!', '#ff6b6b');
+  dropPhotos(p) {
+    if (!this.photosOf(p)) return;
+    p.photos.fill(0);
+    this.scene.bannerFor(p, '📱 Your phone broke! Unfiled photos lost!', '#ff6b6b');
   }
 
   suspend(bk) {
@@ -235,3 +241,4 @@ export class BossFight {
     }
   }
 }
+

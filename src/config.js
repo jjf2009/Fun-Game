@@ -32,7 +32,9 @@ export const CONFIG = {
   raidDuration: 30,              // seconds to sneak your friend out during a warden check
 
   // ---- Outsider gang ----
-  gangRaidDuration: 15,
+  gangRaidDuration: 24,           // seconds (shorter once special security arrives)
+  police: { delay: 7, delaySecurity: 4 }, // seconds for the police jeep to arrive after your call
+  rebellion: { need: 4, max: 6 },         // rebels needed to charge, and the most that can join
   bombRadius: 46,
 
   // ---- Boss Night (the finale) ----

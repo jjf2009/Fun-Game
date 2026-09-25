@@ -12,5 +12,9 @@ The owner builds this game only with AI and has no game-dev background, so keep 
 - Hostel events (gang / warden raid / water cut) are started by `systems/EventDirector.js`.
 - Boss Night (`CONFIG.bossNight`) is the finale: `GameScene.bossNight` disables the timer/director/water/seniors and runs `systems/BossFight.js` (bikes, photos → complaints → suspensions → `GameScene.victory()` → `VictoryScene`). Bomb throwing/explosions are shared in `systems/bombs.js`.
 - Keep villains fictional: no real names or features of real students.
+- Players: `GameScene.players` (sprites with per-player state: hidden, frozen, freshness, photos, invulnUntil, seniorBreakUntil). `this.player` is the local one. Anything that targets/hurts the player must take a player (`hurt(msg, p)`, `visiblePlayers()`, `nearestVisiblePlayer()`), never assume one player.
+- Timers: use `scene.now` (game loop time), not `this.time.now` (frozen while paused for a ragging task).
+- Co-op (src/net/): host-authoritative. `HostNet` auto-syncs every Image/Sprite/Text/Arc created after it starts (set `obj.noNet = true` to skip, `text.netAlt` for different text on the friend's screen) and sends HUD via `hudFor(p)`. Particles, sounds, camera effects and light flashes are sent as events (`scene.netEvent`, `shakeAll`, `fxFlash`, `sfx.onPlay`). Use `gotoScene()` for screen changes both players should see. `GuestMirror` renders the friend's view and moves their own character locally.
+- Testing co-op locally: run a PeerJS server (`npm i peer`, listen on 127.0.0.1:9000) and open two separate browsers at `?peerhost=127.0.0.1&peerport=9000&renderer=canvas` (canvas keeps headless tests at 60 fps).
 - Visual check: build, run `npx vite preview`, and drive it with Playwright (Chromium is pre-installed). `window.game` exposes the Phaser game for debugging.
 - Keep the tone light and comedic. Ragging is shown as something to escape from, never rewarded.
