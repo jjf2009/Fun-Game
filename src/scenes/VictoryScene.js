@@ -66,7 +66,7 @@ export default class VictoryScene extends Phaser.Scene {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     share.on('pointerup', () => {
-      const text = `I got ${CONFIG.bossName}'s gang SUSPENDED and saved ${CONFIG.hostelName} in ${CONFIG.gameTitle} with ${score} points! Can you? ${window.location.href}`;
+      const text = `🏍️ I got ${CONFIG.bossName}'s gang SUSPENDED and saved ${CONFIG.hostelName} in Hostel Nights (${score} points, ${CONFIG.modes[mode].name} mode)!\nYour turn 👉 ${CONFIG.shareUrl}`;
       shareText(text, (msg) => share.setText(msg));
     });
 

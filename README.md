@@ -1,5 +1,7 @@
 # 🌙 Hostel Nights
 
+[![Hostel Nights](public/og-image.jpg)](https://jjf2009.github.io/hostel-nights/)
+
 A top-down browser game about college hostel life. Knock on doors at 2 AM and run, dodge the warden's flashlight, sneak your non-hosteller friend out during a surprise check, survive the outsider gang's bomb attacks, escape the seniors, and stay fresh through the water cuts.
 
 Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
@@ -125,6 +127,10 @@ It's switched off until you connect a free Firebase database (about 5 minutes, n
 6. Commit and push. The leaderboard is live after the next deploy.
 
 To test without Firebase, add `?leaderboard=mock` to the game URL. That uses a fake board saved only in your browser.
+
+## Sharing the game
+
+Ready-to-post WhatsApp and LinkedIn text, plus a pre-launch checklist, are in [`LAUNCH.md`](LAUNCH.md). The link preview image is `public/og-image.jpg`, and the share link used by the in-game buttons is `CONFIG.shareUrl`.
 
 ## Make it YOUR hostel
 
