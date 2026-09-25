@@ -83,7 +83,7 @@ The outsider gang's leader **Bike Bhai** arrives with his gang on **3 bikes, tri
 3. 2 photos suspend each henchman bike, and 3 suspend Bike Bhai. Getting hit breaks your phone, so you lose any photos you haven't filed!
 4. Once both henchman bikes are suspended, Bike Bhai gets **furious**. Get him suspended and **you save the hostel**!
 
-After you reach Boss Night once, the menu has a **BOSS NIGHT** button so you can replay it.
+You can only reach Boss Night by surviving the first 4 nights. There's no shortcut on the menu.
 
 ## Run it on your computer
 

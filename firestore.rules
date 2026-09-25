@@ -9,8 +9,9 @@ service cloud.firestore {
       allow create: if board in ['scores_easy', 'scores_hard', 'scores_story']
         && request.resource.data.keys().hasOnly(['name', 'score', 'coop', 'at'])
         && request.resource.data.name is string
-        && request.resource.data.name.size() >= 1
         && request.resource.data.name.size() <= 16
+        // only the game's random names (word lists in src/names.js; update this line if you change them)
+        && request.resource.data.name.matches('^(Sleepy|Hungry|Sneaky|Lazy|Loud|Brave|Chill|Silent|Speedy|Tiny|Mighty|Jolly|Rowdy|Snoozy|Cheeky|Midnight|Lucky|Fuzzy) (Fresher|Topper|Owl|Maggi|Chai|Ninja|Rebel|Panda|Tiger|Mango|Samosa|Bucket|Pillow|Slipper|Knocker|Bunker|Parotta|Goat) [1-9][0-9]$')
         && request.resource.data.score is int
         && request.resource.data.score >= (board == 'scores_story' ? 20 : 1)
         && request.resource.data.score <= 100000
