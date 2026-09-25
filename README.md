@@ -4,9 +4,11 @@ A top-down browser game about college hostel life. Knock on doors at 2 AM and ru
 
 Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 
+### ▶️ [Play now: jjf2009.github.io/hostel-nights](https://jjf2009.github.io/hostel-nights/)
+
 ## 📱 Play on your phone
 
-- Open the game link in Chrome (Android) or Safari (iPhone) and **turn your phone sideways**.
+- Open [the game link](https://jjf2009.github.io/hostel-nights/) in Chrome (Android) or Safari (iPhone) and **turn your phone sideways**.
 - **Left side of the screen** = joystick (drag anywhere on the left half). **ACT** button = knock / interact.
 - Tap **⛶** (top of the screen) for full screen on Android.
 - **Install it like an app:** Android: Chrome menu → *Add to Home screen*. iPhone: Share → *Add to Home Screen*. It then opens full screen, in landscape, with its own icon.
@@ -42,6 +44,8 @@ After you reach Boss Night once, the menu has a **BOSS NIGHT** button so you can
 You need [Node.js](https://nodejs.org) (version 18 or newer).
 
 ```bash
+git clone https://github.com/jjf2009/hostel-nights.git
+cd hostel-nights
 npm install
 npm run dev
 ```
@@ -52,7 +56,7 @@ Then open the link it prints (usually http://localhost:5173). `npm run dev` also
 
 1. Merge this code into the `main` branch.
 2. On GitHub, open **Settings → Pages**, and under **Build and deployment → Source** choose **GitHub Actions**.
-3. Every push to `main` now publishes the game to `https://<your-username>.github.io/<repo-name>/`. Share that link in the hostel group!
+3. Every push to `main` now publishes the game to `https://<your-username>.github.io/<repo-name>/` (for this repo: https://jjf2009.github.io/hostel-nights/). Share that link in the hostel group!
 
 ## Make it YOUR hostel
 
