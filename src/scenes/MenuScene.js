@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { sfx } from '../sfx.js';
-import { getBest, isBossUnlocked, seenHowTo, markHowToSeen } from '../storage.js';
+import { getBest, seenHowTo, markHowToSeen } from '../storage.js';
 import { rng } from '../art/pixels.js';
 import { enterFullscreen, addFullscreenButton, isIOS, isStandalone } from '../mobile.js';
 import { endSession } from '../net/session.js';
@@ -66,7 +66,6 @@ export default class MenuScene extends Phaser.Scene {
       fontFamily: FONT, fontSize: '14px', color: '#adb5bd', stroke: '#000', strokeThickness: 3,
     }).setOrigin(0.5);
 
-    const bossUnlocked = isBossUnlocked();
     const btn = this.add.rectangle(cx - 305, 462, 280, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
     const label = this.add.text(cx - 305, 464, '▶ PLAY', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
     this.tweens.add({ targets: [btn, label], scale: 1.05, duration: 600, yoyo: true, repeat: -1 });
@@ -110,16 +109,10 @@ export default class MenuScene extends Phaser.Scene {
     };
     btn.on('pointerup', start);
 
-    const help = this.add.rectangle(700, 516, 150, 36, 0x1d3557).setStrokeStyle(3, 0x80ffdb).setInteractive({ useHandCursor: true });
-    this.add.text(700, 517, '❓ HOW TO PLAY', { fontFamily: TITLE_FONT, fontSize: '10px', color: '#ffffff' }).setOrigin(0.5);
+    const help = this.add.rectangle(870, 516, 150, 36, 0x1d3557).setStrokeStyle(3, 0x80ffdb).setInteractive({ useHandCursor: true });
+    this.add.text(870, 517, '❓ HOW TO PLAY', { fontFamily: TITLE_FONT, fontSize: '10px', color: '#ffffff' }).setOrigin(0.5);
     help.on('pointerup', () => this.openHowTo());
 
-    // Replay the finale once you've reached it
-    if (bossUnlocked) {
-      const bossBtn = this.add.rectangle(870, 516, 160, 36, 0xd62828).setStrokeStyle(3, 0x2a0008).setInteractive({ useHandCursor: true });
-      this.add.text(870, 517, 'BOSS NIGHT', { fontFamily: TITLE_FONT, fontSize: '11px', color: '#ffffff' }).setOrigin(0.5);
-      bossBtn.on('pointerup', () => this.showModePicker(CONFIG.bossNight));
-    }
     this.input.keyboard.once('keydown-SPACE', start);
     this.input.keyboard.once('keydown-ENTER', start);
   }
