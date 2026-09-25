@@ -21,9 +21,10 @@ export default class UIScene extends Phaser.Scene {
     this.scoreText = this.add.text(948, 9, '', style).setOrigin(1, 0);
     this.add.rectangle(8, 42, 196, 58, 0x000000, 0.45).setOrigin(0).setStrokeStyle(2, 0xffffff, 0.15);
     this.hearts = Array.from({ length: 4 }, (_, i) => this.add.image(26 + i * 26, 56, 'heart').setScale(1.1));
-    this.add.image(24, 84, 'drop');
-    this.add.rectangle(40, 84, 152, 12, 0x000000, 0.7).setOrigin(0, 0.5).setStrokeStyle(1, 0xffffff, 0.3);
+    const drop = this.add.image(24, 84, 'drop');
+    const freshBg = this.add.rectangle(40, 84, 152, 12, 0x000000, 0.7).setOrigin(0, 0.5).setStrokeStyle(1, 0xffffff, 0.3);
     this.freshBar = this.add.rectangle(41, 84, 150, 10, 0x4cc9f0).setOrigin(0, 0.5);
+    this.freshParts = [drop, freshBg, this.freshBar]; // hidden in story mode (no water cuts there)
     this.comboText = this.add.text(12, 106, '', { ...style, fontSize: '14px', color: '#80ffdb' });
     this.statusText = this.add.text(948, 44, '', { ...style, fontSize: '15px', align: 'right' }).setOrigin(1, 0);
     this.hintText = this.add.text(480, this.isTouch ? 440 : 515, '', {
@@ -124,6 +125,11 @@ export default class UIScene extends Phaser.Scene {
     const m = Math.floor(mins % 60);
     const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
     this.clockText.setText(h.bossNight ? '🏍️ BOSS NIGHT' : `🌙 ${h12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`);
+    if (h.story) {
+      this.nightText.setText(`📖 CHAPTER ${h.story.chapter} · ${h.story.title}`);
+      this.clockText.setText(`🌙 ${h.story.time}`);
+    }
+    this.freshParts.forEach((o) => o.setVisible(!h.story));
 
     const f = Phaser.Math.Clamp(h.fresh, 0, 100) / 100;
     this.freshBar.width = 150 * f;

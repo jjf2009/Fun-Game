@@ -67,11 +67,17 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const bossUnlocked = isBossUnlocked();
-    const btn = this.add.rectangle(cx - 165, 462, 300, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
-    const label = this.add.text(cx - 165, 464, '▶ PLAY', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
+    const btn = this.add.rectangle(cx - 305, 462, 280, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
+    const label = this.add.text(cx - 305, 464, '▶ PLAY', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
     this.tweens.add({ targets: [btn, label], scale: 1.05, duration: 600, yoyo: true, repeat: -1 });
-    const coop = this.add.rectangle(cx + 165, 462, 300, 56, 0x80ffdb).setStrokeStyle(4, 0x1a1020).setInteractive({ useHandCursor: true });
-    this.add.text(cx + 165, 464, '👥 WITH A FRIEND', { fontFamily: TITLE_FONT, fontSize: '14px', color: '#1a1020' }).setOrigin(0.5);
+    const story = this.add.rectangle(cx, 462, 280, 56, 0xff9f1c).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
+    this.add.text(cx, 464, '📖 STORY', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#1a1020' }).setOrigin(0.5);
+    story.on('pointerup', () => {
+      sfx.unlock();
+      this.scene.start('StoryMenu');
+    });
+    const coop = this.add.rectangle(cx + 305, 462, 280, 56, 0x80ffdb).setStrokeStyle(4, 0x1a1020).setInteractive({ useHandCursor: true });
+    this.add.text(cx + 305, 464, '👥 WITH A FRIEND', { fontFamily: TITLE_FONT, fontSize: '13px', color: '#1a1020' }).setOrigin(0.5);
     coop.on('pointerup', () => {
       sfx.unlock();
       this.scene.start('Lobby');

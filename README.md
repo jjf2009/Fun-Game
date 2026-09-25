@@ -28,6 +28,19 @@ Tap **PLAY** and choose:
 
 Each mode keeps its own best score. In co-op, the host picks the mode. All the numbers are in `CONFIG.modes` in `src/config.js`.
 
+## 📖 Story mode: *Speak Up*
+
+Tap **STORY** on the menu. It's set in the Old Days, before the hostel had proper security, when the seniors ruled the corridors at night. Nobody ever said anything, until you did.
+
+| Chapter | Goal |
+|---|---|
+| 1 · Fresher | Sneak past a senior who is ragging a junior and get to your room |
+| 2 · Evidence | Photograph 3 ragging scenes without walking into a senior's sight cone. If he catches you, he deletes your photos |
+| 3 · Witnesses | Talk to scared juniors and pick the right words. Kind, honest answers get a statement, and the junior becomes your **ally** (if a senior catches you, an ally distracts him) |
+| 4 · Speak Up | Reach the common room PC, send the anti-ragging complaint **anonymously** (with the proof: photos, statements and dates), then hide till morning |
+
+The ending shows what happened after the complaint, plus real help: the National Anti-Ragging Helpline **1800-180-5522** and **helpline@antiragging.in**. Your progress is saved, finished chapters can be replayed, and a full run from chapter 1 records your best time. All the story text is in `src/story/chapters.js`.
+
 ## How to play
 
 | Thing | What to do |
@@ -97,7 +110,7 @@ Open **`src/config.js`** and change:
 - `bossNight`, `bossName`: which night is the finale and the gang leader's name
 - numbers such as `nightLength`, `lives`, and speeds to make it easier or harder
 
-Story lines between nights are in `src/scenes/NightIntroScene.js`, and the angry-student yells are in `src/objects/Door.js`.
+Story lines between nights are in `src/scenes/NightIntroScene.js`, Story mode's text is in `src/story/chapters.js`, and the angry-student yells are in `src/objects/Door.js`.
 
 ## Art & credits
 
@@ -116,9 +129,10 @@ Want real sprite packs? [Kenney.nl](https://kenney.nl/assets) has thousands of f
 src/
   config.js            names + difficulty numbers
   map.js               hostel layout (tile grid) + path finding
-  scenes/              screens: Menu, NightIntro, Game, UI (HUD), Ragging, GameOver
+  scenes/              screens: Menu, NightIntro, Game, UI (HUD), Ragging, GameOver, Story*/Dialogue/Email
+  story/               Story mode: chapter text, StoryDirector (goals per chapter), Watcher (senior with a sight cone)
   objects/             characters: Warden, Senior, Door (+ angry student), Npc (shared base)
-  systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting
+  systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting, RoomManager (people in rooms)
   art/                 pixel-art generator + DiceBear portraits
   net/                 online co-op: Net (PeerJS), HostNet (host streams the game), GuestMirror (friend's view), session
   sfx.js               sound effects generated in code

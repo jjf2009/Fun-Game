@@ -11,6 +11,11 @@ import RaggingScene from './scenes/RaggingScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
 import VictoryScene from './scenes/VictoryScene.js';
 import LobbyScene from './scenes/LobbyScene.js';
+import StoryMenuScene from './scenes/StoryMenuScene.js';
+import StoryIntroScene from './scenes/StoryIntroScene.js';
+import StoryEndScene from './scenes/StoryEndScene.js';
+import DialogueScene from './scenes/DialogueScene.js';
+import EmailScene from './scenes/EmailScene.js';
 
 function startGame() {
   // ?renderer=canvas forces the simpler canvas renderer (handy for slow devices and automated tests)
@@ -25,7 +30,8 @@ function startGame() {
     physics: { default: 'arcade', arcade: { debug: false } },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },
-    scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene, VictoryScene, LobbyScene],
+    scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene, VictoryScene, LobbyScene,
+      StoryMenuScene, StoryIntroScene, StoryEndScene, DialogueScene, EmailScene],
   });
   // Handy for debugging in the browser console.
   window.game = game;

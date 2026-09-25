@@ -40,3 +40,43 @@ export function unlockBoss() {
     // ignore
   }
 }
+
+// Story mode progress: the highest chapter you can play (1..5, 5 = finished) and your best full-story time.
+const STORY_KEY = 'hostelNights.storyChapter';
+const STORY_TIME_KEY = 'hostelNights.storyBestTime';
+
+export function storyProgress() {
+  try {
+    return Number(localStorage.getItem(STORY_KEY)) || 1;
+  } catch {
+    return 1;
+  }
+}
+
+export function unlockChapter(n) {
+  try {
+    if (n > storyProgress()) localStorage.setItem(STORY_KEY, String(n));
+  } catch {
+    // ignore
+  }
+}
+
+export function storyBestTime() {
+  try {
+    return Number(localStorage.getItem(STORY_TIME_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+// Returns true if this is a new best (fastest) time
+export function saveStoryTime(seconds) {
+  const best = storyBestTime();
+  if (best && seconds >= best) return false;
+  try {
+    localStorage.setItem(STORY_TIME_KEY, String(Math.round(seconds)));
+  } catch {
+    // ignore
+  }
+  return true;
+}
