@@ -32,6 +32,7 @@ Each mode keeps its own best score. In co-op, the host picks the mode. All the n
 
 | Thing | What to do |
 |---|---|
+| 🛏️ **Rooms** | Every room has someone in it: asleep, studying with a laptop, on the phone, or playing music. Knock and you'll see them get up and come to the door. Empty rooms (lots in EASY, the seniors are on internship) mean nobody answers. |
 | 🚪 **Knock & run** | Press **SPACE** (or **ACT**) near a door. It opens in ~2 seconds, so RUN. Knock quickly one after another for a combo (up to x5). |
 | 🔦 **Warden** | Patrols with a flashlight. If you step into the light, the warden chases you. Break line of sight or hide in your room. |
 | 🚨 **Warden check** | Once per night, your friend Bunty is in your room! Go to your door, press ACT, and lead them to the **main gate** without the flashlight seeing them. |

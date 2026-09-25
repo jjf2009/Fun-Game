@@ -9,6 +9,7 @@ The owner builds this game only with AI and has no game-dev background, so keep 
 - Names/difficulty live in `src/config.js`. Put new tunables there. Difficulty modes are `CONFIG.modes.easy/hard`; the mode travels in scene data (`mode`) from the menu picker/lobby → NightIntro → Game → GameOver/Victory, and `GameScene.modeCfg` holds the active settings. Best scores are per mode (`getBest(mode)`).
 - The map is a tile grid built in `src/map.js` (`buildMap`). NPCs move using `findPath` (BFS) via the `Npc` base class. Only the player has wall physics.
 - `GameScene` owns the game state (score, lives, hidden, era) and calls `update()` on every object/system. `UIScene` just reads `GameScene` fields each frame. Banners go through `scene.banner(text, color)`.
+- Room residents: `systems/RoomManager.js` (seeded by night+mode so co-op devices match; visuals are `noNet`, wake/goHome sent as `occ` events). Doors call `rooms.wake/goHome`, and angry students/rebels use the resident's texture (`res0..res5`).
 - Hostel events (gang / warden raid / water cut) are started by `systems/EventDirector.js`.
 - Boss Night (`CONFIG.bossNight`) is the finale: `GameScene.bossNight` disables the timer/director/water/seniors and runs `systems/BossFight.js` (bikes, photos → complaints → suspensions → `GameScene.victory()` → `VictoryScene`). Bomb throwing/explosions are shared in `systems/bombs.js`.
 - Keep villains fictional: no real names or features of real students.

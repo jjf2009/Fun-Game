@@ -154,7 +154,7 @@ export class GangSystem {
       s.floatText(door.front.x, door.front.y - 30, 'Enough people! Go to the gate!', '#06d6a0', 13);
       return;
     }
-    this.rebels.push(new Rebel(s, door.frontTile.x, door.frontTile.y, this.rebels.length));
+    this.rebels.push(new Rebel(s, door.frontTile.x, door.frontTile.y, this.rebels.length, s.rooms?.keyFor(door.roomNo)));
     s.addScore(10, null, door.front.x, door.front.y - 50);
     if (this.rebels.length === CONFIG.rebellion.need) s.banner('✊ Enough rebels! Lead them to the MAIN GATE and charge!', '#06d6a0');
   }

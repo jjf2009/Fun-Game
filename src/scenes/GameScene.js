@@ -12,6 +12,7 @@ import { RaidSystem } from '../systems/RaidSystem.js';
 import { EventDirector } from '../systems/EventDirector.js';
 import { Lighting } from '../systems/Lighting.js';
 import { BossFight } from '../systems/BossFight.js';
+import { RoomManager } from '../systems/RoomManager.js';
 import { HostNet } from '../net/HostNet.js';
 import { GuestMirror } from '../net/GuestMirror.js';
 import { gotoScene } from '../net/session.js';
@@ -47,6 +48,7 @@ export default class GameScene extends Phaser.Scene {
     this.walls = this.buildWalls();
     this.physics.world.setBounds(0, 0, COLS * TILE, ROWS * TILE);
     this.lighting = new Lighting(this);
+    this.rooms = new RoomManager(this); // people in the rooms (built the same way on both co-op devices)
     this.over = false;
     this.players = [];
 
