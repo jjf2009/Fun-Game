@@ -18,7 +18,14 @@ export const CONFIG = {
   // Off until you paste your Firebase web config here (see README, "Online leaderboard").
   // Example: firebase: { apiKey: '...', authDomain: '...', projectId: '...', appId: '...' },
   leaderboard: {
-    firebase: null,
+    firebase: {
+      apiKey: 'AIzaSyAUzAy8b5Q0o7XRXeS2x6Jy1MJNsspyRr0',
+      authDomain: 'gec-hostel-nights.firebaseapp.com',
+      projectId: 'gec-hostel-nights',
+      storageBucket: 'gec-hostel-nights.firebasestorage.app',
+      messagingSenderId: '512615518040',
+      appId: '1:512615518040:web:4908fb82698440a5735f2d',
+    },
     top: 10,                     // how many names each board shows
   },
 
