@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// Security rules for the online leaderboard (paste these into Firebase: Firestore Database -> Rules).
+// Anyone can read the boards and add a score. Nobody can change or delete scores.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{board}/{entry} {
+      allow read: if board in ['scores_easy', 'scores_hard', 'scores_story'];
+      allow create: if board in ['scores_easy', 'scores_hard', 'scores_story']
+        && request.resource.data.keys().hasOnly(['name', 'score', 'coop', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 16
+        && request.resource.data.score is int
+        && request.resource.data.score >= (board == 'scores_story' ? 20 : 1)
+        && request.resource.data.score <= 100000
+        && request.resource.data.coop is bool
+        && request.resource.data.at == request.time;
+      allow update, delete: if false;
+    }
+  }
+}

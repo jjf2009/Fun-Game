@@ -16,6 +16,7 @@ import StoryIntroScene from './scenes/StoryIntroScene.js';
 import StoryEndScene from './scenes/StoryEndScene.js';
 import DialogueScene from './scenes/DialogueScene.js';
 import EmailScene from './scenes/EmailScene.js';
+import LeaderboardScene from './scenes/LeaderboardScene.js';
 
 function startGame() {
   // ?renderer=canvas forces the simpler canvas renderer (handy for slow devices and automated tests)
@@ -31,7 +32,7 @@ function startGame() {
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },
     scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene, VictoryScene, LobbyScene,
-      StoryMenuScene, StoryIntroScene, StoryEndScene, DialogueScene, EmailScene],
+      StoryMenuScene, StoryIntroScene, StoryEndScene, DialogueScene, EmailScene, LeaderboardScene],
   });
   // Handy for debugging in the browser console.
   window.game = game;

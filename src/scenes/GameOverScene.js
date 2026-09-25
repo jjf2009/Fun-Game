@@ -3,6 +3,7 @@ import { CONFIG, FONT, TITLE_FONT } from '../config.js';
 import { getBest, saveBest } from '../storage.js';
 import { shareText } from '../mobile.js';
 import { coopEndButtons } from '../net/session.js';
+import { addSubmitButton } from '../ui/submitScore.js';
 
 const TITLES = [
   [0, 'Innocent Fresher'],
@@ -60,6 +61,8 @@ export default class GameOverScene extends Phaser.Scene {
       const text = `I scored ${score} in ${CONFIG.gameTitle} (${title}) and survived ${night - 1} nights at ${CONFIG.hostelName}! Beat me: ${window.location.href}`;
       shareText(text, (msg) => share.setText(msg));
     });
+
+    addSubmitButton(this, 170, 440, { board: mode, score, coop: !!this.result.mp });
 
     const restart = coopEndButtons(this, this.result.mp, again, againLabel);
     this.time.delayedCall(600, () => this.input.keyboard.once('keydown-SPACE', restart));

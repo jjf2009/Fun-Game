@@ -4,6 +4,7 @@ import { sfx } from '../sfx.js';
 import { getBest, saveBest } from '../storage.js';
 import { shareText } from '../mobile.js';
 import { coopEndButtons } from '../net/session.js';
+import { addSubmitButton } from '../ui/submitScore.js';
 
 // You got the boss suspended. You win!
 export default class VictoryScene extends Phaser.Scene {
@@ -68,6 +69,8 @@ export default class VictoryScene extends Phaser.Scene {
       const text = `I got ${CONFIG.bossName}'s gang SUSPENDED and saved ${CONFIG.hostelName} in ${CONFIG.gameTitle} with ${score} points! Can you? ${window.location.href}`;
       shareText(text, (msg) => share.setText(msg));
     });
+
+    addSubmitButton(this, 160, 440, { board: mode, score, coop: !!this.result.mp, w: 250 });
 
     sfx.win();
     this.time.delayedCall(700, () => sfx.win());

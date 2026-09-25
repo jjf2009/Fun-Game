@@ -14,6 +14,14 @@ export const CONFIG = {
   oldDaysNights: 3,              // nights 1..3 = "Old Days" (no security, seniors roam)
   lives: 3,                      // (each mode below sets its own lives)
 
+  // ---- Online leaderboard (TOP 10) ----
+  // Off until you paste your Firebase web config here (see README, "Online leaderboard").
+  // Example: firebase: { apiKey: '...', authDomain: '...', projectId: '...', appId: '...' },
+  leaderboard: {
+    firebase: null,
+    top: 10,                     // how many names each board shows
+  },
+
   // ---- Modes ----
   // EASY: the seniors are away on internship. HARD: internship is over, the seniors are back.
   // seniors: how many roam each night = min(max, base + floor(night * perNight)); 'security' = count after security arrives

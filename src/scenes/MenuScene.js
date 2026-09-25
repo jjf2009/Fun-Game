@@ -98,6 +98,11 @@ export default class MenuScene extends Phaser.Scene {
 
     if (touch) addFullscreenButton(this, 40, 30);
 
+    // Online TOP 10
+    const topBtn = this.add.rectangle(90, 516, 160, 36, 0x9d4edd).setStrokeStyle(3, 0x1a1020).setInteractive({ useHandCursor: true });
+    this.add.text(90, 517, '🏆 TOP 10', { fontFamily: TITLE_FONT, fontSize: '11px', color: '#ffffff' }).setOrigin(0.5);
+    topBtn.on('pointerup', () => this.scene.start('Leaderboard'));
+
     const start = () => this.showModePicker(1);
     btn.on('pointerup', start);
 

@@ -99,6 +99,28 @@ Then open the link it prints (usually http://localhost:5173). `npm run dev` also
 2. On GitHub, open **Settings → Pages**, and under **Build and deployment → Source** choose **GitHub Actions**.
 3. Every push to `main` now publishes the game to `https://<your-username>.github.io/<repo-name>/` (for this repo: https://jjf2009.github.io/hostel-nights/). Share that link in the hostel group!
 
+## 🏆 Online leaderboard (TOP 10)
+
+There are three boards: **EASY**, **HARD** (highest score) and **STORY** (fastest full run). After a game, tap **🏆 SUBMIT SCORE** and type a nickname. Tap **🏆 TOP 10** on the menu to see the boards.
+
+It's switched off until you connect a free Firebase database (about 5 minutes, no credit card):
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com), click **Add project**, and give it a name. Google Analytics isn't needed.
+2. In the menu, open **Build → Firestore Database → Create database**. Pick a location near you and choose **production mode**.
+3. Open the **Rules** tab, replace everything with the contents of [`firestore.rules`](firestore.rules), and click **Publish**. These rules let anyone read the boards and add a score, but nobody can edit or delete scores.
+4. Go to **Project settings** (the ⚙️ icon) and, under **Your apps**, click the **</>** (web) icon. Register the app; Hosting isn't needed. Firebase shows you a `firebaseConfig = { ... }` block.
+5. Paste that block into `src/config.js`:
+   ```js
+   leaderboard: {
+     firebase: { apiKey: '...', authDomain: '...', projectId: '...', storageBucket: '...', messagingSenderId: '...', appId: '...' },
+     top: 10,
+   },
+   ```
+   These keys are safe to put in public code: the rules above decide what people can do.
+6. Commit and push. The leaderboard is live after the next deploy.
+
+To test without Firebase, add `?leaderboard=mock` to the game URL. That uses a fake board saved only in your browser.
+
 ## Make it YOUR hostel
 
 Open **`src/config.js`** and change:
@@ -135,6 +157,8 @@ src/
   systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting, RoomManager (people in rooms)
   art/                 pixel-art generator + DiceBear portraits
   net/                 online co-op: Net (PeerJS), HostNet (host streams the game), GuestMirror (friend's view), session
+  ui/                  shared bits: HTML text box, the SUBMIT SCORE button
+  leaderboard.js       online TOP 10 (Firebase Firestore, loaded only when used)
   sfx.js               sound effects generated in code
 ```
 

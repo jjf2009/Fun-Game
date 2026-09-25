@@ -5,6 +5,7 @@ import { Net } from '../net/Net.js';
 import { startSession, endSession, gotoScene } from '../net/session.js';
 import { isBossUnlocked } from '../storage.js';
 import { enterFullscreen } from '../mobile.js';
+import { makeTextBox } from '../ui/textBox.js';
 
 // PLAY WITH A FRIEND: one player creates a room and shares the 4-letter code, the other joins with it.
 export default class LobbyScene extends Phaser.Scene {
@@ -147,38 +148,10 @@ export default class LobbyScene extends Phaser.Scene {
   // A real HTML text box on top of the game, so phones show their keyboard.
   // It must live inside the full-screen element, or the browser hides it in full-screen mode.
   makeCodeBox() {
-    const box = document.createElement('input');
-    Object.assign(box, { maxLength: 4, placeholder: 'CODE', autocomplete: 'off', autocapitalize: 'characters', spellcheck: false });
-    Object.assign(box.style, {
-      position: 'fixed', textAlign: 'center', fontFamily: '"Press Start 2P", monospace', textTransform: 'uppercase',
-      color: '#1a1020', background: '#fff3b0', border: '4px solid #1a1020', borderRadius: '6px', zIndex: 5,
-      userSelect: 'text', webkitUserSelect: 'text', touchAction: 'manipulation', boxSizing: 'border-box',
-    });
-    box.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.join(); });
-    this.codeBox = box;
-    this.placeCodeBox = () => {
-      const home = document.fullscreenElement ?? document.body;
-      if (box.parentElement !== home) home.appendChild(box);
-      const canvas = this.game.canvas.getBoundingClientRect();
-      const k = canvas.width / 960;
-      Object.assign(box.style, {
-        left: `${canvas.left + (480 - 110) * k}px`, top: `${canvas.top + (262 - 30) * k}px`,
-        width: `${220 * k}px`, height: `${60 * k}px`, fontSize: `${34 * k}px`,
-      });
-    };
-    this.placeCodeBox();
-    // Keep it in place when the screen changes (full screen, rotation, phone keyboard opening)
-    document.addEventListener('fullscreenchange', this.placeCodeBox);
-    this.scale.on('resize', this.placeCodeBox);
-    setTimeout(() => { this.placeCodeBox?.(); box.focus(); }, 150);
+    this.codeBox = makeTextBox(this, { x: 480, y: 262, w: 220, h: 60, fontSize: 34, maxLength: 4, placeholder: 'CODE', upper: true, onEnter: () => this.join() });
   }
 
   removeCodeBox() {
-    if (this.placeCodeBox) {
-      document.removeEventListener('fullscreenchange', this.placeCodeBox);
-      this.scale.off('resize', this.placeCodeBox);
-      this.placeCodeBox = null;
-    }
     this.codeBox?.remove();
     this.codeBox = null;
   }

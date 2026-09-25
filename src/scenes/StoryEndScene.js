@@ -4,6 +4,7 @@ import { sfx } from '../sfx.js';
 import { ENDING, REAL_HELP } from '../story/chapters.js';
 import { saveStoryTime, storyBestTime } from '../storage.js';
 import { formatTime } from './StoryMenuScene.js';
+import { addSubmitButton } from '../ui/submitScore.js';
 
 // STORY ending: what happened after the complaint, then real-world help.
 export default class StoryEndScene extends Phaser.Scene {
@@ -73,11 +74,14 @@ export default class StoryEndScene extends Phaser.Scene {
     c.add(this.add.text(480, 342, REAL_HELP.join('\n'), {
       fontFamily: FONT, fontSize: '17px', color: '#ffffff', align: 'center', lineSpacing: 4,
     }).setOrigin(0.5));
-    const btn = this.add.rectangle(480, 490, 260, 50, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
+    // A full run can go on the online STORY board (fastest time wins)
+    const submit = this.d.fullRun ? addSubmitButton(this, 340, 490, { board: 'story', score: Math.round(this.d.storyTime), w: 260, label: '🏆 SUBMIT TIME' }) : null;
+    if (submit) c.add([submit.btn, submit.label]);
+    const mx = submit ? 620 : 480;
+    const btn = this.add.rectangle(mx, 490, 260, 50, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
     c.add(btn);
-    c.add(this.add.text(480, 492, 'MENU', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#1a1020' }).setOrigin(0.5));
+    c.add(this.add.text(mx, 492, 'MENU', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#1a1020' }).setOrigin(0.5));
     btn.on('pointerup', () => this.scene.start('Menu'));
-    this.submitSpot = { x: 480, y: 250 }; // the leaderboard submit button goes here (added with the leaderboard)
     this.events.emit('final-shown');
   }
 }
