@@ -30,7 +30,9 @@ export default class GameScene extends Phaser.Scene {
   init(data) {
     this.night = data.night ?? 1;
     this.score = data.score ?? 0;
-    this.lives = data.lives ?? CONFIG.lives;
+    this.mode = data.mode === 'hard' ? 'hard' : 'easy';
+    this.modeCfg = CONFIG.modes[this.mode];
+    this.lives = data.lives ?? this.modeCfg.lives;
     this.knocks = data.knocks ?? 0;
     this.era = this.night <= CONFIG.oldDaysNights ? 'old' : 'security';
     this.bossNight = this.night === CONFIG.bossNight;
@@ -88,7 +90,9 @@ export default class GameScene extends Phaser.Scene {
     const lobby = tileCenter(11, 12);
     this.warden = new Warden(this, lobby.x, lobby.y);
     this.seniors = [];
-    let seniorCount = this.era === 'old' ? Math.min(1 + Math.floor(this.night / 2), 3) : (Math.random() < 0.4 ? 1 : 0);
+    // EASY: seniors are away on internship. HARD: they're back, and there are lots of them.
+    const sc = this.modeCfg.seniors;
+    let seniorCount = this.era === 'old' ? Math.min(sc.max, sc.base + Math.floor(this.night * sc.perNight)) : sc.security;
     if (this.bossNight) {
       // On Boss Night the warden sits at the Anti-Ragging Cell desk, and there are no seniors.
       seniorCount = 0;
@@ -687,6 +691,7 @@ export default class GameScene extends Phaser.Scene {
     }
     return {
       night: this.night, era: this.era, bossNight: this.bossNight, score: this.score, lives: this.lives,
+      mode: this.mode, maxLives: this.modeCfg.lives,
       timeLeft: this.timeLeft, combo: this.combo, fresh: p.freshness, hint: p.hint, hidden: p.hidden,
       frozen: p.frozen, status,
     };
@@ -715,8 +720,9 @@ export default class GameScene extends Phaser.Scene {
     this.time.delayedCall(2500, () => this.leave('NightIntro', {
       night: this.night + 1,
       score: this.score,
-      lives: Math.min(this.lives + 1, CONFIG.lives),
+      lives: Math.min(this.lives + 1, this.modeCfg.lives),
       knocks: this.knocks,
+      mode: this.mode,
     }));
   }
 
@@ -726,13 +732,13 @@ export default class GameScene extends Phaser.Scene {
     this.physics.pause();
     sfx.win();
     this.cameras.main.flash(1000, 255, 240, 200);
-    this.time.delayedCall(1200, () => this.leave('Victory', { score: this.score, knocks: this.knocks, lives: this.lives }));
+    this.time.delayedCall(1200, () => this.leave('Victory', { score: this.score, knocks: this.knocks, lives: this.lives, mode: this.mode }));
   }
 
   gameOver() {
     this.over = true;
     this.physics.pause();
     sfx.fail();
-    this.time.delayedCall(1600, () => this.leave('GameOver', { score: this.score, night: this.night, knocks: this.knocks }));
+    this.time.delayedCall(1600, () => this.leave('GameOver', { score: this.score, night: this.night, knocks: this.knocks, mode: this.mode }));
   }
 }

@@ -12,7 +12,31 @@ export const CONFIG = {
   // ---- Night ----
   nightLength: 150,              // seconds per night (11 PM -> 5 AM in game)
   oldDaysNights: 3,              // nights 1..3 = "Old Days" (no security, seniors roam)
-  lives: 3,
+  lives: 3,                      // (each mode below sets its own lives)
+
+  // ---- Modes ----
+  // EASY: the seniors are away on internship. HARD: internship is over, the seniors are back.
+  // seniors: how many roam each night = min(max, base + floor(night * perNight)); 'security' = count after security arrives
+  modes: {
+    easy: {
+      name: 'EASY', title: 'Internship Season', color: '#80ffdb',
+      intro: 'The seniors are off on internship. Enjoy it while it lasts!',
+      lives: 4,
+      seniors: { base: 0, perNight: 0.5, max: 1, security: 0 },
+      seniorSpeed: 0.9, seniorSight: 130,   // senior speed multiplier, how far they see (px)
+      wardenSpeed: 0.9,                     // warden speed multiplier
+      eventRate: 0.8,                       // how often hostel events happen (lower = fewer)
+    },
+    hard: {
+      name: 'HARD', title: 'Seniors Are Back', color: '#ff6b6b',
+      intro: 'Internship is over. The seniors are back... and bored.',
+      lives: 3,
+      seniors: { base: 3, perNight: 0.5, max: 5, security: 2 },
+      seniorSpeed: 1.1, seniorSight: 190,
+      wardenSpeed: 1.0,
+      eventRate: 1.25,
+    },
+  },
 
   // ---- Player ----
   playerSpeed: 175,

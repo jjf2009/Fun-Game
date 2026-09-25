@@ -6,7 +6,7 @@ The owner builds this game only with AI and has no game-dev background, so keep 
 - `npm run dev` runs the dev server, and `npm run build` must pass before committing.
 - Graphics: sprites/tiles/furniture are generated as pixel art in `src/art/pixels.js`, portraits come from DiceBear pixel-art (`src/art/portraits.js`, CC0), and fonts come from Fontsource (`FONT`, `TITLE_FONT` in config). All textures are created in `BootScene`. Character textures are `<key>`, `<key>_1`, `<key>_2`, with a `<key>-walk` animation, facing RIGHT (rotate to face movement). Sounds are generated with Web Audio in `src/sfx.js`.
 - Lighting (`systems/Lighting.js`) is a screen-sized RenderTexture at depth 15. Anything that must stay readable at night (labels, warnings, float texts) needs depth > 15.
-- Names/difficulty live in `src/config.js`. Put new tunables there.
+- Names/difficulty live in `src/config.js`. Put new tunables there. Difficulty modes are `CONFIG.modes.easy/hard`; the mode travels in scene data (`mode`) from the menu picker/lobby → NightIntro → Game → GameOver/Victory, and `GameScene.modeCfg` holds the active settings. Best scores are per mode (`getBest(mode)`).
 - The map is a tile grid built in `src/map.js` (`buildMap`). NPCs move using `findPath` (BFS) via the `Npc` base class. Only the player has wall physics.
 - `GameScene` owns the game state (score, lives, hidden, era) and calls `update()` on every object/system. `UIScene` just reads `GameScene` fields each frame. Banners go through `scene.banner(text, color)`.
 - Hostel events (gang / warden raid / water cut) are started by `systems/EventDirector.js`.

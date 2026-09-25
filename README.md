@@ -14,6 +14,20 @@ Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 - **Install it like an app:** Android: Chrome menu → *Add to Home screen*. iPhone: Share → *Add to Home Screen*. It then opens full screen, in landscape, with its own icon.
 - The share button on the results screen opens your phone's share sheet, so you can send your score straight to WhatsApp.
 
+## Two modes
+
+Tap **PLAY** and choose:
+
+| | 🟢 EASY: *Internship Season* | 🔴 HARD: *Seniors Are Back* |
+|---|---|---|
+| Story | The seniors are away on internship | Internship is over, and the seniors are back (and bored) |
+| Seniors | 0–1 | 3–5, and they spot you from further away |
+| Warden | a bit slower | full speed |
+| Hostel events | fewer | more often |
+| Lives | 4 | 3 |
+
+Each mode keeps its own best score. In co-op, the host picks the mode. All the numbers are in `CONFIG.modes` in `src/config.js`.
+
 ## How to play
 
 | Thing | What to do |

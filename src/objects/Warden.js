@@ -30,8 +30,8 @@ export class Warden extends Npc {
     const n = this.scene.night;
     const w = CONFIG.warden;
     return {
-      patrol: Math.min(w.patrol + n * 6 + (this.raid ? 30 : 0), 140),
-      chase: Math.min(w.chase + n * 5 + (this.raid ? 10 : 0), CONFIG.playerSpeed - 8),
+      patrol: Math.min((w.patrol + n * 6 + (this.raid ? 30 : 0)) * this.scene.modeCfg.wardenSpeed, 140),
+      chase: Math.min((w.chase + n * 5 + (this.raid ? 10 : 0)) * this.scene.modeCfg.wardenSpeed, CONFIG.playerSpeed - 8),
       range: w.visionRange + n * 6 + (this.raid ? 60 : 0),
     };
   }

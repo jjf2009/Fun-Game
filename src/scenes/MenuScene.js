@@ -26,6 +26,7 @@ export default class MenuScene extends Phaser.Scene {
   create() {
     const cx = 480;
     endSession(this.game); // coming back to the menu leaves any co-op room
+    this.picker = null; // the menu is reused, so forget the picker from last time
     this.drawSkyline();
 
     const title = this.add.text(cx, 62, CONFIG.gameTitle, {
@@ -67,7 +68,7 @@ export default class MenuScene extends Phaser.Scene {
 
     const bossUnlocked = isBossUnlocked();
     const btn = this.add.rectangle(cx - 165, 462, 300, 56, 0xffcc00).setStrokeStyle(4, 0x3d2c00).setInteractive({ useHandCursor: true });
-    const label = this.add.text(cx - 165, 464, 'START NIGHT 1', { fontFamily: TITLE_FONT, fontSize: '16px', color: '#1a1020' }).setOrigin(0.5);
+    const label = this.add.text(cx - 165, 464, '▶ PLAY', { fontFamily: TITLE_FONT, fontSize: '18px', color: '#1a1020' }).setOrigin(0.5);
     this.tweens.add({ targets: [btn, label], scale: 1.05, duration: 600, yoyo: true, repeat: -1 });
     const coop = this.add.rectangle(cx + 165, 462, 300, 56, 0x80ffdb).setStrokeStyle(4, 0x1a1020).setInteractive({ useHandCursor: true });
     this.add.text(cx + 165, 464, '👥 WITH A FRIEND', { fontFamily: TITLE_FONT, fontSize: '14px', color: '#1a1020' }).setOrigin(0.5);
@@ -82,32 +83,74 @@ export default class MenuScene extends Phaser.Scene {
       this.tweens.add({ targets: t, alpha: 0, delay: 3500, duration: 800 });
     }
 
-    const best = getBest();
-    if (best > 0) this.add.text(cx, 515, `BEST SCORE: ${best}`, { fontFamily: FONT, fontSize: '16px', color: '#80ffdb', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5);
+    const bests = ['easy', 'hard'].map((m) => [m, getBest(m)]).filter(([, b]) => b > 0);
+    if (bests.length) {
+      this.add.text(cx, 515, `BEST · ${bests.map(([m, b]) => `${CONFIG.modes[m].name} ${b}`).join('  ·  ')}`, {
+        fontFamily: FONT, fontSize: '16px', color: '#80ffdb', stroke: '#000', strokeThickness: 3,
+      }).setOrigin(0.5);
+    }
 
     if (touch) addFullscreenButton(this, 40, 30);
 
-    const start = () => {
-      enterFullscreen(this);
-      sfx.unlock();
-      sfx.knock();
-      this.scene.start('NightIntro', { night: 1, score: 0, lives: CONFIG.lives, knocks: 0 });
-    };
+    const start = () => this.showModePicker(1);
     btn.on('pointerup', start);
 
     // Replay the finale once you've reached it
     if (bossUnlocked) {
       const bossBtn = this.add.rectangle(870, 516, 160, 36, 0xd62828).setStrokeStyle(3, 0x2a0008).setInteractive({ useHandCursor: true });
       this.add.text(870, 517, 'BOSS NIGHT', { fontFamily: TITLE_FONT, fontSize: '11px', color: '#ffffff' }).setOrigin(0.5);
-      bossBtn.on('pointerup', () => {
-        enterFullscreen(this);
-        sfx.unlock();
-        sfx.engine();
-        this.scene.start('NightIntro', { night: CONFIG.bossNight, score: 0, lives: CONFIG.lives, knocks: 0 });
-      });
+      bossBtn.on('pointerup', () => this.showModePicker(CONFIG.bossNight));
     }
     this.input.keyboard.once('keydown-SPACE', start);
     this.input.keyboard.once('keydown-ENTER', start);
+  }
+
+  // EASY or HARD? Starts Night 1 (or Boss Night) in the chosen mode.
+  showModePicker(night) {
+    if (this.picker) return;
+    sfx.unlock();
+    const c = this.add.container(0, 0).setDepth(50);
+    this.picker = c;
+    const shade = this.add.rectangle(480, 270, 960, 540, 0x000000, 0.8).setInteractive(); // blocks clicks behind
+    c.add(shade);
+    c.add(this.add.text(480, 60, night === CONFIG.bossNight ? 'BOSS NIGHT · CHOOSE A MODE' : 'CHOOSE A MODE', {
+      fontFamily: TITLE_FONT, fontSize: '22px', color: '#ffe066', stroke: '#000', strokeThickness: 6,
+    }).setOrigin(0.5));
+
+    const go = (mode) => {
+      enterFullscreen(this);
+      if (night === CONFIG.bossNight) sfx.engine(); else sfx.knock();
+      this.scene.start('NightIntro', { night, score: 0, knocks: 0, mode });
+    };
+    [['easy', 270, 0x1b4332, ['face_player', 'face_warden']], ['hard', 690, 0x3a0610, ['face_senior', 'face_senior', 'face_senior']]].forEach(([mode, x, bg, faces]) => {
+      const m = CONFIG.modes[mode];
+      const color = Phaser.Display.Color.HexStringToColor(m.color).color;
+      const card = this.add.rectangle(x, 280, 360, 330, bg).setStrokeStyle(4, color).setInteractive({ useHandCursor: true });
+      c.add(card);
+      c.add(this.add.text(x, 145, m.name, { fontFamily: TITLE_FONT, fontSize: '30px', color: m.color, stroke: '#000', strokeThickness: 6 }).setOrigin(0.5));
+      c.add(this.add.text(x, 185, m.title, { fontFamily: FONT, fontSize: '20px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5));
+      faces.forEach((f, i) => c.add(this.add.image(x + (i - (faces.length - 1) / 2) * 70, 250, f).setScale(0.32)));
+      c.add(this.add.text(x, 330, `"${m.intro}"`, {
+        fontFamily: FONT, fontSize: '15px', color: '#caf0f8', align: 'center', wordWrap: { width: 320 },
+      }).setOrigin(0.5));
+      const sc = m.seniors;
+      c.add(this.add.text(x, 385, `${'♥'.repeat(m.lives)}  ·  ${sc.max === 0 ? 'no' : `${sc.base || 0}–${sc.max}`} seniors`, {
+        fontFamily: FONT, fontSize: '16px', color: m.color,
+      }).setOrigin(0.5));
+      const best = getBest(mode);
+      c.add(this.add.text(x, 418, best ? `Best: ${best}` : 'No score yet', { fontFamily: FONT, fontSize: '15px', color: '#adb5bd' }).setOrigin(0.5));
+      card.on('pointerup', () => go(mode));
+    });
+    c.add(this.add.text(480, 480, this.sys.game.device.input.touch ? 'Tap a mode to start' : 'Click a mode, or press E (Easy) / H (Hard)', {
+      fontFamily: FONT, fontSize: '16px', color: '#adb5bd',
+    }).setOrigin(0.5));
+    const close = this.add.text(900, 40, '✕', { fontFamily: FONT, fontSize: '32px', color: '#ffffff' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    c.add(close);
+    const closePicker = () => { c.destroy(); this.picker = null; };
+    close.on('pointerup', closePicker);
+    this.input.keyboard.once('keydown-E', () => this.picker === c && go('easy'));
+    this.input.keyboard.once('keydown-H', () => this.picker === c && go('hard'));
+    this.input.keyboard.once('keydown-ESC', () => this.picker === c && closePicker());
   }
 
   // Night sky with stars, a moon, and the hostel building with random lit windows.

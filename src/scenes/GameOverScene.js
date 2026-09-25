@@ -23,7 +23,8 @@ export default class GameOverScene extends Phaser.Scene {
 
   create() {
     const { score, night, knocks } = this.result;
-    const isNewBest = saveBest(score);
+    const mode = this.result.mode ?? 'easy';
+    const isNewBest = saveBest(score, mode);
     const title = TITLES.filter(([min]) => score >= min).pop()[1];
 
     const bg = this.add.graphics();
@@ -43,7 +44,7 @@ export default class GameOverScene extends Phaser.Scene {
       `Score: ${score}${isNewBest ? '  (NEW BEST!)' : ''}`,
       `Nights survived: ${night - 1}`,
       `Doors knocked: ${knocks}`,
-      `Best score: ${getBest()}`,
+      `Best (${CONFIG.modes[mode].name}): ${getBest(mode)}`,
     ];
     this.add.text(560, 240, lines.join('\n'), {
       fontFamily: FONT, fontSize: '24px', color: '#ffffff', align: 'center', lineSpacing: 10,

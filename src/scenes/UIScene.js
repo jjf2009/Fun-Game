@@ -20,7 +20,7 @@ export default class UIScene extends Phaser.Scene {
     this.clockText = this.add.text(480, 9, '', { ...style, color: '#ffe066' }).setOrigin(0.5, 0);
     this.scoreText = this.add.text(948, 9, '', style).setOrigin(1, 0);
     this.add.rectangle(8, 42, 196, 58, 0x000000, 0.45).setOrigin(0).setStrokeStyle(2, 0xffffff, 0.15);
-    this.hearts = Array.from({ length: CONFIG.lives }, (_, i) => this.add.image(26 + i * 26, 56, 'heart').setScale(1.1));
+    this.hearts = Array.from({ length: 4 }, (_, i) => this.add.image(26 + i * 26, 56, 'heart').setScale(1.1));
     this.add.image(24, 84, 'drop');
     this.add.rectangle(40, 84, 152, 12, 0x000000, 0.7).setOrigin(0, 0.5).setStrokeStyle(1, 0xffffff, 0.3);
     this.freshBar = this.add.rectangle(41, 84, 150, 10, 0x4cc9f0).setOrigin(0, 0.5);
@@ -108,9 +108,10 @@ export default class UIScene extends Phaser.Scene {
     if (!h) return; // co-op friend: waiting for the first update from the host
 
     const era = h.era === 'old' ? 'The Old Days' : 'Security Era';
-    this.nightText.setText(h.bossNight ? 'FINAL NIGHT · Save the hostel!' : `NIGHT ${h.night} · ${era}${g.mp ? ' · CO-OP' : ''}`);
+    const mode = CONFIG.modes[h.mode]?.name ?? '';
+    this.nightText.setText(h.bossNight ? `FINAL NIGHT · ${mode}` : `NIGHT ${h.night} · ${era} · ${mode}${g.mp ? ' · CO-OP' : ''}`);
     this.scoreText.setText(`SCORE ${h.score}`);
-    this.hearts.forEach((heart, i) => heart.setTexture(i < h.lives ? 'heart' : 'heartEmpty'));
+    this.hearts.forEach((heart, i) => heart.setTexture(i < h.lives ? 'heart' : 'heartEmpty').setVisible(i < h.maxLives));
     if (h.lives !== this.lastLives) {
       if (this.lastLives !== undefined && h.lives < this.lastLives) this.tweens.add({ targets: this.hearts, scale: 1.6, duration: 120, yoyo: true });
       this.lastLives = h.lives;

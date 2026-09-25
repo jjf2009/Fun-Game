@@ -88,9 +88,19 @@ export default class LobbyScene extends Phaser.Scene {
       this.clearPanel();
       this.status.setText('✅ Your friend joined! Ready when you are.');
       const bossReady = isBossUnlocked();
-      const startNight = (night) => gotoScene(this, 'NightIntro', { night, score: 0, lives: CONFIG.lives, knocks: 0 });
-      this.button(bossReady ? 330 : 480, 300, 300, 66, 'START NIGHT 1', 0xffcc00, () => startNight(1), 18, this.panel);
-      if (bossReady) this.button(680, 300, 240, 66, 'BOSS NIGHT', 0xd62828, () => startNight(CONFIG.bossNight), 16, this.panel);
+      // The host picks the mode; the friend gets the same one.
+      let mode = 'easy';
+      const modeBtns = {};
+      const pick = (m) => {
+        mode = m;
+        for (const [k, [r]] of Object.entries(modeBtns)) r.setAlpha(k === m ? 1 : 0.35);
+      };
+      modeBtns.easy = this.button(360, 262, 220, 50, 'EASY', 0x80ffdb, () => pick('easy'), 16, this.panel);
+      modeBtns.hard = this.button(600, 262, 220, 50, 'HARD', 0xff6b6b, () => pick('hard'), 16, this.panel);
+      pick('easy');
+      const startNight = (night) => gotoScene(this, 'NightIntro', { night, score: 0, knocks: 0, mode });
+      this.button(bossReady ? 360 : 480, 335, 300, 58, 'START NIGHT 1', 0xffcc00, () => startNight(1), 16, this.panel);
+      if (bossReady) this.button(680, 335, 220, 58, 'BOSS NIGHT', 0xd62828, () => startNight(CONFIG.bossNight), 14, this.panel);
     });
     net.on('error', (msg) => this.fail(msg));
     net.host();

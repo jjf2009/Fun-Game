@@ -32,6 +32,8 @@ export default class NightIntroScene extends Phaser.Scene {
 
   create() {
     const { night } = this.data_;
+    this.data_.mode = this.data_.mode === 'hard' ? 'hard' : 'easy';
+    const modeCfg = CONFIG.modes[this.data_.mode];
     const era = night <= CONFIG.oldDaysNights ? 'old' : 'security';
     const firstSecurityNight = night === CONFIG.oldDaysNights + 1;
 
@@ -60,12 +62,16 @@ export default class NightIntroScene extends Phaser.Scene {
     const eraTitle = era === 'old' ? 'THE OLD DAYS · The guards sleep, the seniors rule' : 'THE SECURITY ERA';
     this.add.text(480, 185, eraTitle, { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: era === 'old' ? '#ff8fa3' : '#90e0ef' }).setOrigin(0.5);
 
-    const flavor = night === 1 ? FLAVOR.old[0] : Phaser.Utils.Array.GetRandom(FLAVOR[era]);
+    // Mode badge (top right) + on Night 1 the mode's own story line
+    this.add.text(940, 20, `${modeCfg.name} · ${modeCfg.title}`, {
+      fontFamily: FONT, fontSize: '16px', color: '#1a1020', backgroundColor: modeCfg.color, padding: { x: 8, y: 4 },
+    }).setOrigin(1, 0);
+    const flavor = night === 1 ? modeCfg.intro : Phaser.Utils.Array.GetRandom(FLAVOR[era]);
     this.add.text(480, 240, `"${flavor}"`, {
       fontFamily: FONT, fontSize: '19px', color: '#ffffff', align: 'center', wordWrap: { width: 760 },
     }).setOrigin(0.5);
 
-    this.add.text(480, 290, `Score: ${this.data_.score}   Lives: ${'♥'.repeat(this.data_.lives)}`, {
+    this.add.text(480, 290, `Score: ${this.data_.score}   Lives: ${'♥'.repeat(this.data_.lives ?? CONFIG.modes[this.data_.mode].lives)}`, {
       fontFamily: FONT, fontSize: '18px', color: '#80ffdb',
     }).setOrigin(0.5);
 
@@ -146,7 +152,7 @@ export default class NightIntroScene extends Phaser.Scene {
       this.tweens.add({ targets: b, x: 1100 - i * 150, duration: 4200, repeat: -1, delay: i * 150 });
     });
 
-    this.add.text(480, 505, `Score: ${this.data_.score}   Lives: ${'♥'.repeat(this.data_.lives)}`, {
+    this.add.text(480, 505, `Score: ${this.data_.score}   Lives: ${'♥'.repeat(this.data_.lives ?? CONFIG.modes[this.data_.mode].lives)}`, {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb',
     }).setOrigin(0.5);
     const tap = this.add.text(480, 480, this.sys.game.device.input.touch ? 'Tap to face them' : 'Press SPACE to face them', {
