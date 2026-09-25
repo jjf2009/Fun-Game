@@ -8,6 +8,15 @@ Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 
 ### ▶️ [Play now: jjf2009.github.io/hostel-nights](https://jjf2009.github.io/hostel-nights/)
 
+## 🎬 Watch it
+
+| Knock, run, hide, and call the police on the gang | Story mode: 2 AM, the drunk seniors come |
+|---|---|
+| [![Gameplay: knocking on doors, getting chased, hiding, gang attack](docs/media/preview-gameplay.gif)](docs/media/hostel-nights-gameplay.mp4) | [![Story mode chapter 1: drunk seniors at 2 AM](docs/media/preview-story.gif)](docs/media/hostel-nights-story.mp4) |
+| ▶️ [Full video (0:39)](docs/media/hostel-nights-gameplay.mp4) | ▶️ [Full video (0:58)](docs/media/hostel-nights-story.mp4) |
+
+*Inspired by true events. All names and characters are fictional.*
+
 ## 📱 Play on your phone
 
 - Open [the game link](https://jjf2009.github.io/hostel-nights/) in Chrome (Android) or Safari (iPhone) and **turn your phone sideways**.
@@ -41,7 +50,7 @@ Tap **STORY** on the menu. It's set in the Old Days, before the hostel had prope
 
 | Chapter | Goal |
 |---|---|
-| 1 · Fresher | Sneak past a senior who is ragging a junior and get to your room |
+| 1 · Fresher | Sneak past a senior who is ragging a junior and get to your room. Then, at 2 AM, drunk seniors drag you and your friends out, and nobody does anything |
 | 2 · Evidence | Photograph 3 ragging scenes without walking into a senior's sight cone. If he catches you, he deletes your photos |
 | 3 · Witnesses | Talk to scared juniors and pick the right words. Kind, honest answers get a statement, and the junior becomes your **ally** (if a senior catches you, an ally distracts him) |
 | 4 · Speak Up | Reach the common room PC, send the anti-ragging complaint **anonymously** (with the proof: photos, statements and dates), then hide till morning |
