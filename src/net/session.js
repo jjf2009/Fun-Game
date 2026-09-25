@@ -70,7 +70,7 @@ export function coopEndButtons(scene, mp, againBtn, againLabel) {
   if (mp === 'host' && game.net) {
     const restart = () => {
       if (!game.net) return toMenu();
-      return gotoScene(scene, 'NightIntro', { night: 1, score: 0, lives: CONFIG.lives, knocks: 0 });
+      return gotoScene(scene, 'NightIntro', { night: 1, score: 0, knocks: 0, mode: scene.result?.mode ?? 'easy' });
     };
     againBtn.on('pointerup', restart);
     const quit = scene.add.text(againBtn.x + againBtn.width / 2 + 60, againBtn.y, 'MENU', {

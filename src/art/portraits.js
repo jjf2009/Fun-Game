@@ -24,6 +24,11 @@ export const PORTRAITS = {
     glasses: ['dark07'], glassesProbability: 100, beard: ['variant04'], beardProbability: 100, hat: ['variant08'], hatColor: ['a62116'], hatProbability: 100,
     accessories: ['variant04'], accessoriesColor: ['ffd700'], accessoriesProbability: 100,
   },
+  // Story mode juniors (made-up characters)
+  face_j1: { seed: 'chintu', hair: ['short03'], hairColor: ['28150a'], clothingColor: ['ffd969'], skinColor: ['cb9e6e'], mouth: ['sad04'], glassesProbability: 0, beardProbability: 0, hatProbability: 0 },
+  face_j2: { seed: 'appu', hair: ['short09'], hairColor: ['603a14'], clothingColor: ['88d8b0'], skinColor: ['e0b687'], mouth: ['sad06'], glasses: ['light03'], glassesProbability: 100, beardProbability: 0, hatProbability: 0 },
+  face_j3: { seed: 'monty', hair: ['short21'], hairColor: ['28150a'], clothingColor: ['5bc0de'], skinColor: ['a26d3d'], mouth: ['happy02'], glassesProbability: 0, beardProbability: 0, hatProbability: 0 },
+  face_j4: { seed: 'golu', hair: ['short07'], hairColor: ['83623b'], clothingColor: ['ff6f69'], skinColor: ['f5cfa0'], mouth: ['sad09'], glassesProbability: 0, beardProbability: 0, hatProbability: 0 },
   face_student: { seed: 'student', hair: ['short13'], hairColor: ['603015'], clothingColor: ['ffc425'], skinColor: ['f5cfa0'], mouth: ['sad01'], glasses: ['light05'], glassesProbability: 100, beardProbability: 0, hatProbability: 0 },
 };
 

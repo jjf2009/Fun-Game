@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PEOPLE, personCanvas, bikeCanvas, tileCanvases, propCanvases, lightCanvas, coneCanvas } from '../art/pixels.js';
+import { PEOPLE, RESIDENTS, personCanvas, sleeperCanvas, bikeCanvas, tileCanvases, propCanvases, lightCanvas, coneCanvas } from '../art/pixels.js';
 import { loadPortraits } from '../art/portraits.js';
 import { FONT } from '../config.js';
 
@@ -25,6 +25,16 @@ export default class BootScene extends Phaser.Scene {
         repeat: -1,
       });
     }
+
+    // People who live in the rooms: res0..res5 (+ walking frames) and a sleeping-in-bed picture each
+    RESIDENTS.forEach((look, i) => {
+      const key = `res${i}`;
+      this.textures.addCanvas(key, personCanvas(look, 0));
+      this.textures.addCanvas(`${key}_1`, personCanvas(look, 1));
+      this.textures.addCanvas(`${key}_2`, personCanvas(look, 2));
+      this.textures.addCanvas(`${key}_sleep`, sleeperCanvas(look));
+      this.anims.create({ key: `${key}-walk`, frames: [{ key: `${key}_1` }, { key }, { key: `${key}_2` }, { key }], frameRate: 9, repeat: -1 });
+    });
 
     // Boss Night bikes (3 riders each)
     this.textures.addCanvas('bike', bikeCanvas([PEOPLE.gang, PEOPLE.gang, PEOPLE.gang]));

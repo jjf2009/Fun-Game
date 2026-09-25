@@ -139,6 +139,7 @@ export class GuestMirror {
         break;
       case 'lf': s.lighting.flash(m.x, m.y, m.r, m.duration); break;
       case 'boom': explosionParticles(s, m.x, m.y); break;
+      case 'occ': s.rooms.applyNet(m); break;
       default:
     }
   }

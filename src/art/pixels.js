@@ -117,6 +117,35 @@ export function personCanvas(p, frame) {
   });
 }
 
+// Hostellers who live in the rooms (different shirts, hair and blankets)
+export const RESIDENTS = [
+  { shirt: '#f77f00', skin: '#f1c27d', hair: '#3b2414', blanket: '#4361ee' },
+  { shirt: '#06d6a0', skin: '#c68642', hair: '#111111', blanket: '#e76f51' },
+  { shirt: '#9d4edd', skin: '#e0ac69', hair: '#2b1b12', blanket: '#2a9d8f' },
+  { shirt: '#ffd166', skin: '#8d5524', hair: '#111111', blanket: '#6d597a' },
+  { shirt: '#ef476f', skin: '#f1c27d', hair: '#603a14', blanket: '#264653' },
+  { shirt: '#118ab2', skin: '#c68642', hair: '#1a1a1a', blanket: '#bc4749' },
+];
+
+// Someone asleep in bed, seen from above: head on the pillow, body under the blanket.
+// Same size as the bed picture (16x26 pixels) so it sits exactly on top of it.
+export function sleeperCanvas(p) {
+  return pixelCanvas(16, 26, 2, (set) => {
+    for (let y = 3; y < 8; y++) for (let x = 4; x < 12; x++) set(x, y, '#ffffff'); // pillow
+    disk(set, 8, 6, 2.6, p.hair);
+    set(8, 8, p.skin); set(7, 8, p.skin); set(9, 8, p.skin); // face peeking out
+    // blanket with a body-shaped bump
+    for (let y = 9; y < 24; y++) {
+      for (let x = 2; x < 14; x++) {
+        const bump = Math.abs(x - 8) < 4 - (y > 18 ? 1 : 0);
+        set(x, y, bump ? shade(p.blanket, 0.15) : p.blanket);
+      }
+    }
+    for (let x = 2; x < 14; x++) set(x, 9, shade(p.blanket, 0.4)); // blanket edge
+    set(6, 10, p.skin); // a hand holding the blanket
+  });
+}
+
 // A top-down motorbike (facing RIGHT) with 3 riders on it: triple seat!
 export function bikeCanvas(riders) {
   const W = 40;

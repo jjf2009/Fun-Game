@@ -12,9 +12,13 @@ import { RaidSystem } from '../systems/RaidSystem.js';
 import { EventDirector } from '../systems/EventDirector.js';
 import { Lighting } from '../systems/Lighting.js';
 import { BossFight } from '../systems/BossFight.js';
+import { RoomManager } from '../systems/RoomManager.js';
+import { StoryDirector } from '../story/StoryDirector.js';
+import { CHAPTERS } from '../story/chapters.js';
 import { HostNet } from '../net/HostNet.js';
 import { GuestMirror } from '../net/GuestMirror.js';
 import { gotoScene } from '../net/session.js';
+import { unlockChapter } from '../storage.js';
 
 const SNORES = ['"Zzz... 5 more minutes..."', '"Zzz... not my duty..."', '"Zzz... who is it..."', '"ZZZZZ..."'];
 
@@ -30,10 +34,21 @@ export default class GameScene extends Phaser.Scene {
   init(data) {
     this.night = data.night ?? 1;
     this.score = data.score ?? 0;
-    this.lives = data.lives ?? CONFIG.lives;
+    this.mode = data.mode === 'hard' ? 'hard' : 'easy';
+    this.modeCfg = CONFIG.modes[this.mode];
+    this.lives = data.lives ?? this.modeCfg.lives;
     this.knocks = data.knocks ?? 0;
     this.era = this.night <= CONFIG.oldDaysNights ? 'old' : 'security';
     this.bossNight = this.night === CONFIG.bossNight;
+    // Story mode: data.story = chapter number. Always the Old Days, fixed difficulty.
+    this.storyChapter = data.story ?? null;
+    this.storyData = data;
+    if (this.storyChapter) {
+      this.night = this.storyChapter;
+      this.era = 'old';
+      this.bossNight = false;
+      this.lives = data.lives ?? 3;
+    }
     this.mp = data.mp ?? null;
     this.mirror = null;
     this.hostNet = null;
@@ -45,6 +60,7 @@ export default class GameScene extends Phaser.Scene {
     this.walls = this.buildWalls();
     this.physics.world.setBounds(0, 0, COLS * TILE, ROWS * TILE);
     this.lighting = new Lighting(this);
+    this.rooms = new RoomManager(this); // people in the rooms (built the same way on both co-op devices)
     this.over = false;
     this.players = [];
 
@@ -88,7 +104,10 @@ export default class GameScene extends Phaser.Scene {
     const lobby = tileCenter(11, 12);
     this.warden = new Warden(this, lobby.x, lobby.y);
     this.seniors = [];
-    let seniorCount = this.era === 'old' ? Math.min(1 + Math.floor(this.night / 2), 3) : (Math.random() < 0.4 ? 1 : 0);
+    // EASY: seniors are away on internship. HARD: they're back, and there are lots of them.
+    const sc = this.modeCfg.seniors;
+    let seniorCount = this.era === 'old' ? Math.min(sc.max, sc.base + Math.floor(this.night * sc.perNight)) : sc.security;
+    if (this.storyChapter) seniorCount = 0; // the story places its own seniors
     if (this.bossNight) {
       // On Boss Night the warden sits at the Anti-Ragging Cell desk, and there are no seniors.
       seniorCount = 0;
@@ -109,6 +128,7 @@ export default class GameScene extends Phaser.Scene {
     this.raid = new RaidSystem(this);
     this.director = new EventDirector(this);
     this.bossFight = this.bossNight ? new BossFight(this) : null;
+    this.story = this.storyChapter ? new StoryDirector(this, this.storyChapter) : null;
 
     // State
     this.timeLeft = CONFIG.nightLength;
@@ -116,12 +136,13 @@ export default class GameScene extends Phaser.Scene {
     this.lastKnockAt = -99999;
     this.hideSpots = this.makeHideSpots();
     this.inRagging = false;
+    this.chapterStart = this.now;
 
     this.scene.launch('UI');
     if (this.bossNight) {
       this.time.delayedCall(600, () => this.banner(`🏍️ BOSS NIGHT! ${CONFIG.bossName}'s gang is here on 3 bikes!`, '#ff6b6b'));
       this.time.delayedCall(3800, () => this.banner('📸 Photograph them when they stop, then file complaints at the ANTI-RAGGING CELL!', '#80ffdb'));
-    } else {
+    } else if (!this.story) {
       this.time.delayedCall(600, () => this.banner(`NIGHT ${this.night} - Knock on doors and RUN! Survive till morning.`, '#ffe066'));
     }
   }
@@ -367,7 +388,7 @@ export default class GameScene extends Phaser.Scene {
     }
     const dt = delta / 1000;
 
-    if (!this.bossNight) {
+    if (!this.bossNight && !this.story) {
       this.timeLeft -= dt;
       if (this.timeLeft <= 0) {
         this.nightComplete();
@@ -382,7 +403,9 @@ export default class GameScene extends Phaser.Scene {
     for (const s of this.seniors) s.update(time);
     this.gang.update(dt, time);
     this.raid.update(dt);
-    if (this.bossFight) {
+    if (this.story) {
+      this.story.update(time, dt);
+    } else if (this.bossFight) {
       this.bossFight.update(time, dt);
     } else {
       this.water.update(dt, time);
@@ -465,6 +488,8 @@ export default class GameScene extends Phaser.Scene {
   computeHint(p, time) {
     if (p.frozen) return 'A senior has got you!';
     if (p.hidden) return `Hiding in ${p.hideSpot.name}: ${Math.ceil((p.hideUntil - time) / 1000)}s (move to come out)`;
+    const storyHint = this.story?.hint(p);
+    if (storyHint) return storyHint;
     const bossHint = this.bossFight?.hint(p);
     if (bossHint) return bossHint;
     if (this.near(p, this.map.phone, 60)) return this.gang.phoneHint();
@@ -487,6 +512,7 @@ export default class GameScene extends Phaser.Scene {
 
   handleAction(time, p) {
     if (p.frozen) return;
+    if (this.story?.action(time, p)) return;
     if (this.bossFight?.action(time, p)) return;
     if (this.near(p, this.map.phone, 60)) {
       this.gang.callPolice(p);
@@ -595,6 +621,7 @@ export default class GameScene extends Phaser.Scene {
     this.lives--;
     p.invulnUntil = this.now + 2000;
     this.bossFight?.dropPhotos(p);
+    this.story?.onCaught(p);
     sfx.hurt();
     this.fxHurt(p);
     this.bannerFor(p, reason, '#ff6b6b');
@@ -606,6 +633,8 @@ export default class GameScene extends Phaser.Scene {
 
   startRagging(senior, p) {
     if (this.over || p.frozen || this.inRagging) return;
+    if (this.story?.tryDistract(senior, p)) return; // an ally steps in
+    this.story?.onCaught(p);
     p.setVelocity(0, 0);
     if (!this.hostNet) {
       // Solo: pause the whole game while you do the task
@@ -656,7 +685,7 @@ export default class GameScene extends Phaser.Scene {
 
   hudFor(p) {
     const time = this.now;
-    const status = [];
+    const status = this.story ? this.story.status() : [];
     if (this.bossFight) {
       for (const bk of this.bossFight.bikes) {
         const done = bk.state === 'suspended' || bk.state === 'gone';
@@ -687,6 +716,8 @@ export default class GameScene extends Phaser.Scene {
     }
     return {
       night: this.night, era: this.era, bossNight: this.bossNight, score: this.score, lives: this.lives,
+      mode: this.mode, maxLives: this.story ? 3 : this.modeCfg.lives,
+      story: this.story ? { chapter: this.storyChapter, title: CHAPTERS[this.storyChapter].title, time: CHAPTERS[this.storyChapter].time } : null,
       timeLeft: this.timeLeft, combo: this.combo, fresh: p.freshness, hint: p.hint, hidden: p.hidden,
       frozen: p.frozen, status,
     };
@@ -715,8 +746,9 @@ export default class GameScene extends Phaser.Scene {
     this.time.delayedCall(2500, () => this.leave('NightIntro', {
       night: this.night + 1,
       score: this.score,
-      lives: Math.min(this.lives + 1, CONFIG.lives),
+      lives: Math.min(this.lives + 1, this.modeCfg.lives),
       knocks: this.knocks,
+      mode: this.mode,
     }));
   }
 
@@ -726,13 +758,50 @@ export default class GameScene extends Phaser.Scene {
     this.physics.pause();
     sfx.win();
     this.cameras.main.flash(1000, 255, 240, 200);
-    this.time.delayedCall(1200, () => this.leave('Victory', { score: this.score, knocks: this.knocks, lives: this.lives }));
+    this.time.delayedCall(1200, () => this.leave('Victory', { score: this.score, knocks: this.knocks, lives: this.lives, mode: this.mode }));
+  }
+
+  // Opens a pop-up screen (Dialogue, Email) and pauses the game while it's open (solo only).
+  runOverlay(key, data, onDone) {
+    this.player.setVelocity(0, 0);
+    this.scene.pause();
+    this.scene.pause('UI');
+    this.scene.launch(key, {
+      ...data,
+      onDone: (result) => {
+        this.scene.resume();
+        this.scene.resume('UI');
+        this.input.keyboard.resetKeys();
+        input.reset();
+        onDone(result);
+      },
+    });
+  }
+
+  // Story: chapter finished -> save progress and go to the next chapter card (or the ending)
+  storyComplete() {
+    if (this.over) return;
+    this.over = true;
+    this.physics.pause();
+    sfx.win();
+    const next = this.storyChapter + 1;
+    const storyTime = (this.storyData.storyTime ?? 0) + (this.now - this.chapterStart) / 1000;
+    this.banner(`✅ CHAPTER ${this.storyChapter} COMPLETE!`, '#80ffdb');
+    this.cameras.main.flash(600, 200, 255, 220);
+    unlockChapter(next);
+    const data = { chapter: next, outroOf: this.storyChapter, storyTime, fullRun: this.storyData.fullRun ?? false };
+    this.time.delayedCall(2200, () => this.leave(next > 4 ? 'StoryEnd' : 'StoryIntro', data));
   }
 
   gameOver() {
     this.over = true;
     this.physics.pause();
     sfx.fail();
-    this.time.delayedCall(1600, () => this.leave('GameOver', { score: this.score, night: this.night, knocks: this.knocks }));
+    if (this.story) {
+      // Story: caught too many times -> retry this chapter
+      this.time.delayedCall(1600, () => this.leave('StoryIntro', { chapter: this.storyChapter, failed: true, storyTime: this.storyData.storyTime ?? 0, fullRun: this.storyData.fullRun ?? false }));
+      return;
+    }
+    this.time.delayedCall(1600, () => this.leave('GameOver', { score: this.score, night: this.night, knocks: this.knocks, mode: this.mode }));
   }
 }

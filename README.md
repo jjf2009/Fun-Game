@@ -14,10 +14,38 @@ Plays in any browser on **PC (keyboard)** and **phones (touch joystick)**.
 - **Install it like an app:** Android: Chrome menu → *Add to Home screen*. iPhone: Share → *Add to Home Screen*. It then opens full screen, in landscape, with its own icon.
 - The share button on the results screen opens your phone's share sheet, so you can send your score straight to WhatsApp.
 
+## Two modes
+
+Tap **PLAY** and choose:
+
+| | 🟢 EASY: *Internship Season* | 🔴 HARD: *Seniors Are Back* |
+|---|---|---|
+| Story | The seniors are away on internship | Internship is over, and the seniors are back (and bored) |
+| Seniors | 0–1 | 3–5, and they spot you from further away |
+| Warden | a bit slower | full speed |
+| Hostel events | fewer | more often |
+| Lives | 4 | 3 |
+
+Each mode keeps its own best score. In co-op, the host picks the mode. All the numbers are in `CONFIG.modes` in `src/config.js`.
+
+## 📖 Story mode: *Speak Up*
+
+Tap **STORY** on the menu. It's set in the Old Days, before the hostel had proper security, when the seniors ruled the corridors at night. Nobody ever said anything, until you did.
+
+| Chapter | Goal |
+|---|---|
+| 1 · Fresher | Sneak past a senior who is ragging a junior and get to your room |
+| 2 · Evidence | Photograph 3 ragging scenes without walking into a senior's sight cone. If he catches you, he deletes your photos |
+| 3 · Witnesses | Talk to scared juniors and pick the right words. Kind, honest answers get a statement, and the junior becomes your **ally** (if a senior catches you, an ally distracts him) |
+| 4 · Speak Up | Reach the common room PC, send the anti-ragging complaint **anonymously** (with the proof: photos, statements and dates), then hide till morning |
+
+The ending shows what happened after the complaint, plus real help: the National Anti-Ragging Helpline **1800-180-5522** and **helpline@antiragging.in**. Your progress is saved, finished chapters can be replayed, and a full run from chapter 1 records your best time. All the story text is in `src/story/chapters.js`.
+
 ## How to play
 
 | Thing | What to do |
 |---|---|
+| 🛏️ **Rooms** | Every room has someone in it: asleep, studying with a laptop, on the phone, or playing music. Knock and you'll see them get up and come to the door. Empty rooms (lots in EASY, the seniors are on internship) mean nobody answers. |
 | 🚪 **Knock & run** | Press **SPACE** (or **ACT**) near a door. It opens in ~2 seconds, so RUN. Knock quickly one after another for a combo (up to x5). |
 | 🔦 **Warden** | Patrols with a flashlight. If you step into the light, the warden chases you. Break line of sight or hide in your room. |
 | 🚨 **Warden check** | Once per night, your friend Bunty is in your room! Go to your door, press ACT, and lead them to the **main gate** without the flashlight seeing them. |
@@ -71,6 +99,28 @@ Then open the link it prints (usually http://localhost:5173). `npm run dev` also
 2. On GitHub, open **Settings → Pages**, and under **Build and deployment → Source** choose **GitHub Actions**.
 3. Every push to `main` now publishes the game to `https://<your-username>.github.io/<repo-name>/` (for this repo: https://jjf2009.github.io/hostel-nights/). Share that link in the hostel group!
 
+## 🏆 Online leaderboard (TOP 10)
+
+There are three boards: **EASY**, **HARD** (highest score) and **STORY** (fastest full run). After a game, tap **🏆 SUBMIT SCORE** and type a nickname. Tap **🏆 TOP 10** on the menu to see the boards.
+
+It's switched off until you connect a free Firebase database (about 5 minutes, no credit card):
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com), click **Add project**, and give it a name. Google Analytics isn't needed.
+2. In the menu, open **Build → Firestore Database → Create database**. Pick a location near you and choose **production mode**.
+3. Open the **Rules** tab, replace everything with the contents of [`firestore.rules`](firestore.rules), and click **Publish**. These rules let anyone read the boards and add a score, but nobody can edit or delete scores.
+4. Go to **Project settings** (the ⚙️ icon) and, under **Your apps**, click the **</>** (web) icon. Register the app; Hosting isn't needed. Firebase shows you a `firebaseConfig = { ... }` block.
+5. Paste that block into `src/config.js`:
+   ```js
+   leaderboard: {
+     firebase: { apiKey: '...', authDomain: '...', projectId: '...', storageBucket: '...', messagingSenderId: '...', appId: '...' },
+     top: 10,
+   },
+   ```
+   These keys are safe to put in public code: the rules above decide what people can do.
+6. Commit and push. The leaderboard is live after the next deploy.
+
+To test without Firebase, add `?leaderboard=mock` to the game URL. That uses a fake board saved only in your browser.
+
 ## Make it YOUR hostel
 
 Open **`src/config.js`** and change:
@@ -82,7 +132,7 @@ Open **`src/config.js`** and change:
 - `bossNight`, `bossName`: which night is the finale and the gang leader's name
 - numbers such as `nightLength`, `lives`, and speeds to make it easier or harder
 
-Story lines between nights are in `src/scenes/NightIntroScene.js`, and the angry-student yells are in `src/objects/Door.js`.
+Story lines between nights are in `src/scenes/NightIntroScene.js`, Story mode's text is in `src/story/chapters.js`, and the angry-student yells are in `src/objects/Door.js`.
 
 ## Art & credits
 
@@ -101,11 +151,14 @@ Want real sprite packs? [Kenney.nl](https://kenney.nl/assets) has thousands of f
 src/
   config.js            names + difficulty numbers
   map.js               hostel layout (tile grid) + path finding
-  scenes/              screens: Menu, NightIntro, Game, UI (HUD), Ragging, GameOver
+  scenes/              screens: Menu, NightIntro, Game, UI (HUD), Ragging, GameOver, Story*/Dialogue/Email
+  story/               Story mode: chapter text, StoryDirector (goals per chapter), Watcher (senior with a sight cone)
   objects/             characters: Warden, Senior, Door (+ angry student), Npc (shared base)
-  systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting
+  systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting, RoomManager (people in rooms)
   art/                 pixel-art generator + DiceBear portraits
   net/                 online co-op: Net (PeerJS), HostNet (host streams the game), GuestMirror (friend's view), session
+  ui/                  shared bits: HTML text box, the SUBMIT SCORE button
+  leaderboard.js       online TOP 10 (Firebase Firestore, loaded only when used)
   sfx.js               sound effects generated in code
 ```
 

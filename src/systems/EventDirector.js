@@ -13,7 +13,8 @@ export class EventDirector {
   }
 
   get interval() {
-    return Math.max(9, 20 - this.scene.night * 1.5) + Math.random() * 5;
+    const base = Math.max(9, 20 - this.scene.night * 1.5) + Math.random() * 5;
+    return base / this.scene.modeCfg.eventRate; // EASY: fewer events, HARD: more
   }
 
   update(dt) {

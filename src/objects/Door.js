@@ -33,6 +33,7 @@ export class Door {
     this.rally = this.scene.gang.active && !this.scene.bossNight;
     if (this.rally) this.openAt = time + 700;
     this.scene.floatText(this.front.x, this.front.y - 20, this.rally ? 'WAKE UP! OUTSIDERS!' : 'KNOCK KNOCK!', '#ffe066');
+    this.scene.rooms?.wake(this.roomNo); // the resident gets up and walks to the door
     this.scene.onKnock(this);
     return true;
   }
@@ -51,10 +52,19 @@ export class Door {
   open(time) {
     const s = this.scene;
     this.state = 'open';
+    // Nobody home (EASY has lots of empty rooms: their seniors are on internship)
+    if (s.rooms?.isEmpty(this.roomNo)) {
+      this.light.setAlpha(1).setFillStyle(0x666666);
+      s.floatText(this.front.x, this.front.y - 30, "...nobody's home", '#aaaaaa', 13);
+      this.close(time, false);
+      return;
+    }
     if (this.rally && s.gang.active) {
       this.light.setAlpha(1).setFillStyle(0x06d6a0);
       s.gang.addRebel(this);
-      this.close(time);
+      this.close(time, false);
+      // they come back to bed after the fight
+      s.time.delayedCall(18000, () => s.rooms?.goHome(this.roomNo));
       return;
     }
     this.light.setAlpha(1).setFillStyle(0xff4d4d);
@@ -65,10 +75,11 @@ export class Door {
       this.close(time);
       return;
     }
-    this.student = new AngryStudent(s, this.frontTile.x, this.frontTile.y, this, time);
+    this.student = new AngryStudent(s, this.frontTile.x, this.frontTile.y, this, time, s.rooms?.keyFor(this.roomNo));
   }
 
-  close(time) {
+  close(time, residentReturns = true) {
+    if (residentReturns) this.scene.rooms?.goHome(this.roomNo);
     this.student = null;
     this.state = 'cooldown';
     this.readyAt = time + CONFIG.doorCooldown * 1000;
@@ -77,8 +88,8 @@ export class Door {
 }
 
 class AngryStudent extends Npc {
-  constructor(scene, x, y, door, time) {
-    super(scene, x, y, 'student', `ROOM ${door.roomNo}`, '#ffb703');
+  constructor(scene, x, y, door, time, key = 'student') {
+    super(scene, x, y, key, `ROOM ${door.roomNo}`, '#ffb703');
     this.door = door;
     const n = scene.night;
     this.speed = Math.min(115 + n * 6, 165);

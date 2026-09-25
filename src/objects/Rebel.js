@@ -6,12 +6,12 @@ const SHOUTS = ['OUTSIDERS?! I\'M COMING!', 'NOT IN OUR HOSTEL!', 'GET THE BUCKE
 
 // A hosteller woken up during a gang attack. Follows the nearest player until the rebellion starts.
 export class Rebel extends Npc {
-  constructor(scene, x, y, index) {
-    super(scene, x, y, 'student', 'REBEL', '#06d6a0');
-    this.setTint(Phaser.Utils.Array.GetRandom(TINTS));
+  constructor(scene, x, y, index, key, shouts = SHOUTS) {
+    super(scene, x, y, key ?? 'student', 'REBEL', '#06d6a0');
+    if (!key) this.setTint(Phaser.Utils.Array.GetRandom(TINTS));
     this.index = index;
     this.charging = false;
-    scene.floatText(x, y - 40, Phaser.Utils.Array.GetRandom(SHOUTS), '#06d6a0', 14);
+    scene.floatText(x, y - 40, Phaser.Utils.Array.GetRandom(shouts), '#06d6a0', 14);
   }
 
   update(time) {
@@ -35,7 +35,7 @@ export class Rebel extends Npc {
     this.charging = true;
     this.path = [];
     this.setVelocity(0, 0);
-    this.play('student-walk');
+    this.play(`${this.baseKey}-walk`);
     this.setRotation(Math.atan2(target.y - this.y, target.x - this.x));
     s.tweens.add({
       targets: this, x: target.x + 20, y: target.y, duration: Phaser.Math.Between(650, 950), ease: 'Quad.easeIn',

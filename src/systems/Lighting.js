@@ -32,6 +32,15 @@ export class Lighting {
     }
   }
 
+  // Small fixed light, e.g. a laptop or phone screen in a room. Returns it so it can be switched off (light.off = true).
+  addLight(x, y, r, a, tint) {
+    const glow = this.scene.add.image(x, y, 'light').setScale((r * 2) / 256 * 0.5).setTint(tint).setBlendMode('ADD').setDepth(14);
+    glow.noNet = true;
+    const light = { x, y, r, a, glow, glowAlpha: 0.6 };
+    this.lamps.push(light);
+    return light;
+  }
+
   flash(x, y, r, duration) {
     this.flashes.push({ x, y, r, start: this.scene.game.loop.time, duration });
     this.scene.netEvent?.({ k: 'lf', x, y, r, duration }); // co-op: flash on the friend's screen too
@@ -78,12 +87,13 @@ export class Lighting {
     };
 
     for (const l of this.lamps) {
-      let a = 0.75;
+      if (l.off) { l.glow.setAlpha(0); continue; }
+      let a = l.a ?? 0.75;
       if (l.flicker) {
         const f = Math.sin(time / 90 + l.x) + Math.sin(time / 37 + l.y);
-        a = f > 1.6 ? 0.1 : 0.75;
+        a = f > 1.6 ? 0.1 : a;
       }
-      l.glow.setAlpha(a * 0.4);
+      l.glow.setAlpha(a * (l.glowAlpha ?? 0.4));
       erase(l.x, l.y, l.r, a);
     }
 

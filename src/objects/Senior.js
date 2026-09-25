@@ -20,8 +20,9 @@ export class Senior extends Npc {
   update(time) {
     const s = this.scene;
     const n = s.night;
-    const wanderSpeed = 60 + n * 4;
-    const chaseSpeed = Math.min(120 + n * 6, 160);
+    const mode = s.modeCfg;
+    const wanderSpeed = (60 + n * 4) * mode.seniorSpeed;
+    const chaseSpeed = Math.min((120 + n * 6) * mode.seniorSpeed, 165);
 
     // Holding a player who is doing a ragging task (co-op: the game keeps running)
     if (this.holding) {
@@ -35,7 +36,7 @@ export class Senior extends Npc {
     // Players this senior can pick on: visible, and not on a "senior break"
     const targets = s.visiblePlayers().filter((pl) => time > pl.seniorBreakUntil);
     const seen = time > this.cooldownUntil
-      ? targets.find((pl) => this.distTo(pl) < 150 && hasLineOfSight(this.x, this.y, pl.x, pl.y))
+      ? targets.find((pl) => this.distTo(pl) < mode.seniorSight && hasLineOfSight(this.x, this.y, pl.x, pl.y))
       : null;
     if (seen) {
       if (this.state !== 'chase') s.floatText(this.x, this.y - 40, 'OYE FRESHER! COME HERE!', '#ff8fa3');

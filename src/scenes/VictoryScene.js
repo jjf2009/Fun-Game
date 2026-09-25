@@ -4,6 +4,7 @@ import { sfx } from '../sfx.js';
 import { getBest, saveBest } from '../storage.js';
 import { shareText } from '../mobile.js';
 import { coopEndButtons } from '../net/session.js';
+import { addSubmitButton } from '../ui/submitScore.js';
 
 // You got the boss suspended. You win!
 export default class VictoryScene extends Phaser.Scene {
@@ -17,7 +18,8 @@ export default class VictoryScene extends Phaser.Scene {
 
   create() {
     const { score, knocks } = this.result;
-    const isNewBest = saveBest(score);
+    const mode = this.result.mode ?? 'easy';
+    const isNewBest = saveBest(score, mode);
 
     const bg = this.add.graphics();
     bg.fillGradientStyle(0x1b4332, 0x1b4332, 0x0b0d1f, 0x0b0d1f, 1);
@@ -53,7 +55,7 @@ export default class VictoryScene extends Phaser.Scene {
       this.add.text(x, big ? 300 : 285, name, { fontFamily: FONT, fontSize: big ? '16px' : '14px', color: big ? '#ffd700' : '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
     });
 
-    this.add.text(480, 360, [`Final score: ${score}${isNewBest ? '  (NEW BEST!)' : ''}`, `Doors knocked: ${knocks}   ·   Best: ${getBest()}`].join('\n'), {
+    this.add.text(480, 360, [`Final score: ${score}${isNewBest ? '  (NEW BEST!)' : ''}`, `${CONFIG.modes[mode].name} MODE   ·   Doors knocked: ${knocks}   ·   Best: ${getBest(mode)}`].join('\n'), {
       fontFamily: FONT, fontSize: '22px', color: '#ffffff', align: 'center', lineSpacing: 6, stroke: '#000', strokeThickness: 4,
     }).setOrigin(0.5);
 
@@ -67,6 +69,8 @@ export default class VictoryScene extends Phaser.Scene {
       const text = `I got ${CONFIG.bossName}'s gang SUSPENDED and saved ${CONFIG.hostelName} in ${CONFIG.gameTitle} with ${score} points! Can you? ${window.location.href}`;
       shareText(text, (msg) => share.setText(msg));
     });
+
+    addSubmitButton(this, 160, 440, { board: mode, score, coop: !!this.result.mp, w: 250 });
 
     sfx.win();
     this.time.delayedCall(700, () => sfx.win());
