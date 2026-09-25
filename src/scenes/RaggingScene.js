@@ -20,6 +20,7 @@ export default class RaggingScene extends Phaser.Scene {
     this.onDone = data.onDone;
     this.face = data.face ?? 'face_player';
     this.night = data.night ?? 1;
+    this.title = data.title ?? 'CAUGHT BY A SENIOR!';
   }
 
   create() {
@@ -29,7 +30,7 @@ export default class RaggingScene extends Phaser.Scene {
 
     this.add.rectangle(480, 270, 960, 540, 0x000000, 0.72);
     this.add.rectangle(480, 270, 760, 440, 0x1d1a2b).setStrokeStyle(4, 0xd62828);
-    this.add.text(480, 76, 'CAUGHT BY A SENIOR!', {
+    this.add.text(480, 76, this.title, {
       fontFamily: TITLE_FONT, fontSize: '20px', color: '#ff6b6b', stroke: '#000', strokeThickness: 6,
     }).setOrigin(0.5);
     this.add.rectangle(210, 200, 150, 150, 0x2d2a3e).setStrokeStyle(3, 0xd62828);

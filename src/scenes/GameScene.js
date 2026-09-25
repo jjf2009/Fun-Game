@@ -511,6 +511,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   computeHint(p, time) {
+    if (this.story?.busy) return ''; // a story scene is playing
     if (p.frozen) return 'A senior has got you!';
     if (p.hidden) return `Hiding in ${p.hideSpot.name}: ${Math.ceil((p.hideUntil - time) / 1000)}s (move to come out)`;
     const storyHint = this.story?.hint(p);
@@ -738,7 +739,7 @@ export default class GameScene extends Phaser.Scene {
     return {
       night: this.night, era: this.era, bossNight: this.bossNight, score: this.score, lives: this.lives,
       mode: this.mode, maxLives: this.story ? 3 : this.modeCfg.lives,
-      story: this.story ? { chapter: this.storyChapter, title: CHAPTERS[this.storyChapter].title, time: CHAPTERS[this.storyChapter].time } : null,
+      story: this.story ? { chapter: this.storyChapter, title: CHAPTERS[this.storyChapter].title, time: this.story.timeText ?? CHAPTERS[this.storyChapter].time } : null,
       timeLeft: this.timeLeft, combo: this.combo, fresh: p.freshness, hint: p.hint, hidden: p.hidden,
       frozen: p.frozen, status,
     };

@@ -26,12 +26,12 @@ Game link: **https://jjf2009.github.io/hostel-nights/**
 
 > 🌙 **HOSTEL NIGHTS** is out! 🎮
 >
-> I made a game about our hostel life 😂
+> I made a game about our hostel life 😂 (inspired by true events 👀)
 > 🚪 Knock on doors at 2 AM and RUN
 > 🔦 Dodge Warden Sir's torch
 > 😤 Escape the seniors
 > 💣 Beat the outsider gang and Bike Bhai
-> ✊ Story mode: speak up against ragging
+> ✊ Story mode: drunk seniors at 2 AM, and the night you decide to speak up
 >
 > Works on phone, no download. Play with a friend online too 👥
 > There's a TOP 10 leaderboard, so let's see who's the real hostel legend 🏆
@@ -40,7 +40,7 @@ Game link: **https://jjf2009.github.io/hostel-nights/**
 
 ### Status (post the clip, with this caption)
 
-> Made a game about hostel nights 🌙🚪🏃 Knock, run, survive. Play free 👉 jjf2009.github.io/hostel-nights
+> Made a game about hostel nights 🌙🚪🏃 Inspired by true events. Knock, run, survive. Play free 👉 jjf2009.github.io/hostel-nights
 
 ### Short "forward this" version
 
@@ -54,14 +54,14 @@ Attach the **clip** (LinkedIn plays videos right in the feed), or the banner ima
 
 > I built a video game about hostel life, with zero game-dev experience. 🎮🌙
 >
-> Everyone who lived in a hostel remembers the nights: knocking on doors and running, hiding from the warden's torch, water cuts at the worst moment. I wanted to turn those memories into something people could actually play.
+> Everyone who lived in a hostel remembers the nights: knocking on doors and running, hiding from the warden's torch, water cuts at the worst moment. The events in the game are inspired by true events from hostel life, and I wanted to turn those memories into something people could actually play.
 >
 > I'd never made a game before, so I built it with AI (Claude Code). I described what I wanted, played each version, gave feedback, and kept going. What started as "knock on doors and run" grew into:
 >
 > 🎮 Easy & Hard modes (seniors away on internship vs. back and bored)
 > 👥 Online co-op: play with a friend on two phones, no install
 > 🏍️ A Boss Night finale against an outsider gang on triple-seat bikes
-> ✊ A Story mode, "Speak Up": collect proof, convince scared juniors, and file an anonymous anti-ragging complaint
+> ✊ A Story mode, "Speak Up": it starts at 2 AM, when drunk seniors drag you and your friends out of your rooms and nobody does anything. Then you collect proof, convince scared juniors, and file an anonymous anti-ragging complaint
 > 🏆 An online TOP 10 leaderboard with random anonymous names
 >
 > The Story mode matters most to me. Ragging is often treated as a "tradition" that nobody questions. In the game, speaking up is how you win, and the ending points to real help (the National Anti-Ragging Helpline: 1800-180-5522).
@@ -73,7 +73,7 @@ Attach the **clip** (LinkedIn plays videos right in the feed), or the banner ima
 > It's free and works on your phone. Try to get into the TOP 10 👇
 > 🔗 https://jjf2009.github.io/hostel-nights/
 >
-> (All characters are fictional, and it's meant to be funny.)
+> (The events are inspired by true events. All names and characters are fictional.)
 >
 > #GameDev #BuildInPublic #AI #ClaudeCode #IndieGame #Phaser #AntiRagging
 
