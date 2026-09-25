@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { FONT, TITLE_FONT } from '../config.js';
+import { CONFIG, FONT, TITLE_FONT } from '../config.js';
+import { shareText } from '../mobile.js';
 import { sfx } from '../sfx.js';
 import { ENDING, REAL_HELP } from '../story/chapters.js';
 import { saveStoryTime, storyBestTime } from '../storage.js';
@@ -58,20 +59,28 @@ export default class StoryEndScene extends Phaser.Scene {
 
   showFinal() {
     const c = this.page;
-    c.add(this.add.text(480, 58, 'YOU SPOKE UP.', { fontFamily: TITLE_FONT, fontSize: '32px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 8 }).setOrigin(0.5));
+    c.add(this.add.text(480, 50, 'YOU SPOKE UP.', { fontFamily: TITLE_FONT, fontSize: '32px', color: '#ffe066', stroke: '#3d2c00', strokeThickness: 8 }).setOrigin(0.5));
     ['face_j1', 'face_j2', 'face_player', 'face_j3', 'face_j4'].forEach((f, i) => {
-      const img = this.add.image(480 + (i - 2) * 95, 145, f).setScale(i === 2 ? 0.45 : 0.36);
+      const img = this.add.image(480 + (i - 2) * 95, 128, f).setScale(i === 2 ? 0.45 : 0.36);
       c.add(img);
-      this.tweens.add({ targets: img, y: 137, duration: 400 + i * 60, yoyo: true, repeat: -1, ease: 'Quad.easeOut' });
+      this.tweens.add({ targets: img, y: 120, duration: 400 + i * 60, yoyo: true, repeat: -1, ease: 'Quad.easeOut' });
     });
     if (this.d.fullRun) {
       const best = storyBestTime();
-      c.add(this.add.text(480, 212, `Your time: ${formatTime(this.d.storyTime)}${this.isNewBest ? '  (NEW BEST!)' : `  ·  Best: ${formatTime(best)}`}`, {
+      c.add(this.add.text(480, 190, `Your time: ${formatTime(this.d.storyTime)}${this.isNewBest ? '  (NEW BEST!)' : `  ·  Best: ${formatTime(best)}`}`, {
         fontFamily: FONT, fontSize: '18px', color: '#80ffdb',
       }).setOrigin(0.5));
     }
-    c.add(this.add.rectangle(480, 342, 820, 200, 0x000000, 0.45).setStrokeStyle(2, 0xffd166));
-    c.add(this.add.text(480, 342, REAL_HELP.join('\n'), {
+    const share = this.add.text(480, 226, navigator.share ? '📲 Share the story on WhatsApp' : '📋 Copy a message to share on WhatsApp', {
+      fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    share.on('pointerup', () => {
+      const time = this.d.fullRun ? ` in ${formatTime(this.d.storyTime)}` : '';
+      shareText(`✊ I finished "Speak Up" in Hostel Nights${time}: collected proof, convinced the juniors and reported ragging anonymously.\nPlay it 👉 ${CONFIG.shareUrl}`, (msg) => share.setText(msg));
+    });
+    c.add(share);
+    c.add(this.add.rectangle(480, 352, 820, 186, 0x000000, 0.45).setStrokeStyle(2, 0xffd166));
+    c.add(this.add.text(480, 352, REAL_HELP.join('\n'), {
       fontFamily: FONT, fontSize: '17px', color: '#ffffff', align: 'center', lineSpacing: 4,
     }).setOrigin(0.5));
     // A full run can go on the online STORY board (fastest time wins)

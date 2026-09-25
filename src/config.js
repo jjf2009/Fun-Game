@@ -4,6 +4,7 @@
 export const CONFIG = {
   // ---- Names (personalize these) ----
   gameTitle: 'HOSTEL NIGHTS',
+  shareUrl: 'https://jjf2009.github.io/hostel-nights/', // the link put in WhatsApp shares
   hostelName: 'GEC Boys Hostel',
   wardenName: 'Warden Sir',
   guestName: 'Bunty',            // your non-hosteller friend who sneaks in

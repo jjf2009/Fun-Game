@@ -23,10 +23,10 @@ export const CHAPTERS = [
     ],
     faces: ['face_player', 'face_senior'],
     outro: [
-      'Later that night, someone knocks on your door.',
-      'It is Chintu, the junior from the corridor.',
-      '"Thanks for not laughing. But nobody ever does anything about it."',
-      'You can\'t stop thinking about it.',
+      'The seniors are gone. The corridor is quiet again.',
+      'Nobody came. Not the guard. Not the warden. Not the other rooms.',
+      '"Nothing will ever change," Appu says, and shuts his door.',
+      'You lie awake till morning, thinking... maybe it can.',
     ],
   },
   {

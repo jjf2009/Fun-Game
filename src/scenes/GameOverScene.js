@@ -58,7 +58,8 @@ export default class GameOverScene extends Phaser.Scene {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     share.on('pointerup', () => {
-      const text = `I scored ${score} in ${CONFIG.gameTitle} (${title}) and survived ${night - 1} nights at ${CONFIG.hostelName}! Beat me: ${window.location.href}`;
+      const nights = night - 1;
+      const text = `😤 I scored ${score} on ${CONFIG.modes[mode].name} in Hostel Nights and survived ${nights} night${nights === 1 ? '' : 's'} at ${CONFIG.hostelName} before getting suspended (rank: ${title}).\nBeat me 👉 ${CONFIG.shareUrl}`;
       shareText(text, (msg) => share.setText(msg));
     });
 

@@ -8,7 +8,8 @@ import { Senior } from '../objects/Senior.js';
 import { Rebel } from '../objects/Rebel.js';
 
 // STORY MODE: runs one chapter (goals, hints, what ACTION does) instead of the Arcade events.
-//  Ch1 Fresher   : get inside and sneak past a senior to your room
+//  Ch1 Fresher   : get inside and sneak past a senior to your room. At 2 AM drunk seniors drag
+//                  everyone out (a scripted scene you can't escape), and nobody does anything.
 //  Ch2 Evidence  : photograph 3 ragging scenes without being seen, bring the photos to your room
 //  Ch3 Witnesses : talk 3 scared juniors into giving statements (they become allies)
 //  Ch4 Speak Up  : reach the common room computer, send the anonymous complaint, survive till morning
@@ -68,11 +69,120 @@ export class StoryDirector {
 
   update1() {
     const p = this.s.player;
+    // keep the 2 AM scene's name tags above their heads
+    for (const o of [...(this.drunks ?? []), ...(this.friends ?? [])]) o.label.setPosition(o.x, o.y - 26);
     if (!this.gInside.done && p.x > 11 * TILE) {
       this.gInside.done = true;
       this.s.banner('😟 A senior is ragging a junior in the corridor. Don\'t let him see you!', '#ff8fa3');
-      this.s.time.delayedCall(3500, () => this.s.banner('Tip: wait until he looks away, or go the long way round (via the bathroom).', '#caf0f8'));
+      this.s.time.delayedCall(3500, () => !this.busy && this.s.banner('Tip: wait until he looks away, or go the long way round (via the bathroom).', '#caf0f8'));
     }
+  }
+
+  // Ch1 ending, a scripted scene: 2 AM, drunk seniors drag you and your friends into the corridor.
+  // You can't escape it and no lives are lost: it's the moment that starts the whole story.
+  nightRaid() {
+    const s = this.s;
+    const p = s.player;
+    this.busy = true;
+    p.frozen = true;
+    p.invulnUntil = Infinity;
+    // the corridor senior from earlier has gone to bed
+    s.seniors = s.seniors.filter((x) => x !== this.watcher);
+    this.watcher.destroy();
+    s.banner('💤 You made it. You fall asleep...', '#caf0f8');
+    s.cameras.main.fadeOut(1200, 0, 0, 0);
+    s.time.delayedCall(1500, () => this.raidArrive());
+  }
+
+  raidArrive() {
+    const s = this.s;
+    const p = s.player;
+    const { x, y } = s.myDoor.front;
+    this.timeText = '2:00 AM';
+    this.gNight = this.goal('Get through the night');
+    p.setPosition(x, y).setRotation(Math.PI / 2);
+    const label = (obj, text, color) => s.add.text(obj.x, obj.y - 26, text, {
+      fontFamily: FONT, fontSize: '12px', color, backgroundColor: '#000000aa', padding: { x: 3, y: 1 },
+    }).setOrigin(0.5).setDepth(17);
+    // your friends, dragged out of the rooms next door
+    this.friends = [['Appu', 110, -52], ['Monty', 112, 52]].map(([name, room, dx]) => {
+      const f = s.add.image(x + dx, y, s.rooms.keyFor(room)).setRotation(Math.PI / 2).setDepth(5);
+      f.name = name;
+      f.label = label(f, name.toUpperCase(), '#80ffdb');
+      return f;
+    });
+    // three drunk seniors stumble in from the stairs
+    this.drunks = [0, 1, 2].map((i) => {
+      const d = s.add.sprite(x + 330 + i * 46, y - 18 + i * 18, 'senior').setRotation(Math.PI).setDepth(5);
+      d.play('senior-walk');
+      d.label = label(d, 'DRUNK SENIOR', '#ff8fa3');
+      s.tweens.add({ targets: d, x: x + 110 + i * 40, duration: 2600, ease: 'Sine.easeOut', onComplete: () => d.stop() });
+      s.tweens.add({ targets: d, y: d.y + 10, angle: { from: 170, to: 190 }, duration: 380 + i * 60, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      return d;
+    });
+    this.hics = s.time.addEvent({
+      delay: 850, loop: true,
+      callback: () => {
+        const d = Phaser.Utils.Array.GetRandom(this.drunks);
+        s.floatText(d.x, d.y - 40, Phaser.Utils.Array.GetRandom(['hic!', '*hic*', 'HAHAHA', 'hic... fresherrrs']), '#ffafcc', 13);
+      },
+    });
+    s.cameras.main.fadeIn(600);
+    sfx.knock();
+    s.time.delayedCall(300, () => sfx.knock());
+    s.time.delayedCall(600, () => sfx.yell());
+    s.banner('🌙 2:00 AM. BANG! BANG! BANG! "FRESHERS! EVERYBODY OUT! NOW!"', '#ff6b6b');
+    s.time.delayedCall(2900, () => this.raidRag());
+  }
+
+  raidRag() {
+    const s = this.s;
+    s.banner('"Hic... Line up! Who said freshers can SLEEP?"', '#ff8fa3');
+    for (const f of this.friends) {
+      // push-ups: bob up and down, counting
+      s.tweens.add({ targets: f, scale: 0.85, duration: 300, yoyo: true, repeat: -1 });
+      let n = 0;
+      f.count = s.time.addEvent({ delay: 650, loop: true, callback: () => s.floatText(f.x, f.y - 34, `${++n}...`, '#ffffff', 12) });
+    }
+    s.time.delayedCall(2200, () => {
+      s.runOverlay('Ragging', { night: 1, title: '2 AM: DRUNK SENIORS!' }, (ok) => this.raidLeave(ok));
+    });
+  }
+
+  raidLeave(ok) {
+    const s = this.s;
+    s.floatText(this.drunks[0].x, this.drunks[0].y - 44, ok ? '"Hic! Not bad, fresher. Same time tomorrow!"' : '"Pathetic! Again tomorrow! Hic!"', '#ff8fa3', 14);
+    for (const f of this.friends) {
+      f.count.remove();
+      s.tweens.killTweensOf(f);
+      f.setScale(1);
+    }
+    s.time.delayedCall(1400, () => {
+      this.hics.remove();
+      for (const d of this.drunks) {
+        s.tweens.killTweensOf(d);
+        d.play('senior-walk').setAngle(0); // turn around (sprites face right)
+        s.tweens.add({ targets: d, angle: { from: -12, to: 12 }, duration: 350, yoyo: true, repeat: -1 });
+        s.tweens.add({ targets: [d, d.label], x: `+=${420}`, alpha: 0, duration: 3000, ease: 'Sine.easeIn' });
+      }
+    });
+    // Nobody came. Nobody ever does.
+    const lines = [
+      [0, 'Appu: "Every night. Every single night."'],
+      [1, 'Monty: "The guard is asleep. The warden won\'t come. Nobody does anything."'],
+      [0, 'Appu: "Nothing will ever change."'],
+    ];
+    lines.forEach(([who, text], i) => {
+      s.time.delayedCall(2600 + i * 3000, () => {
+        const f = this.friends[who];
+        s.floatText(f.x, f.y - 40, '...', '#80ffdb', 16);
+        s.banner(text, '#caf0f8');
+      });
+    });
+    s.time.delayedCall(2600 + lines.length * 3000 + 800, () => {
+      this.gNight.done = true;
+      this.complete();
+    });
   }
 
   // ---------------- Chapter 2: EVIDENCE ----------------
@@ -239,7 +349,7 @@ export class StoryDirector {
   }
 
   hint(p) {
-    if (this.done) return null;
+    if (this.done || this.busy) return null;
     if (this.n === 2) {
       const w = this.photoTarget(p);
       if (w) return '📸 Take a photo (stay out of his sight!)';
@@ -257,10 +367,10 @@ export class StoryDirector {
 
   // Returns true if the ACTION was used by the story
   action(time, p) {
-    if (this.done) return false;
+    if (this.done || this.busy) return false;
     if (this.n === 1 && this.gInside.done && this.atMyDoor(p)) {
       this.gRoom.done = true;
-      this.complete();
+      this.nightRaid();
       return true;
     }
     if (this.n === 2) {
