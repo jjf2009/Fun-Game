@@ -15,7 +15,7 @@ import StoryMenuScene from './scenes/StoryMenuScene.js';
 import StoryIntroScene from './scenes/StoryIntroScene.js';
 import StoryEndScene from './scenes/StoryEndScene.js';
 import DialogueScene from './scenes/DialogueScene.js';
-import EmailScene from './scenes/EmailScene.js';
+import ComplaintScene from './scenes/ComplaintScene.js';
 import LeaderboardScene from './scenes/LeaderboardScene.js';
 import PauseScene from './scenes/PauseScene.js';
 import HowToScene from './scenes/HowToScene.js';
@@ -34,7 +34,7 @@ function startGame() {
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },
     scene: [BootScene, MenuScene, NightIntroScene, GameScene, UIScene, RaggingScene, GameOverScene, VictoryScene, LobbyScene,
-      StoryMenuScene, StoryIntroScene, StoryEndScene, DialogueScene, EmailScene, LeaderboardScene, PauseScene, HowToScene],
+      StoryMenuScene, StoryIntroScene, StoryEndScene, DialogueScene, ComplaintScene, LeaderboardScene, PauseScene, HowToScene],
   });
   // Handy for debugging in the browser console.
   window.game = game;

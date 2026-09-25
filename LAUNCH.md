@@ -15,7 +15,7 @@ Game link: **https://jjf2009.github.io/hostel-nights/**
 - **Link preview banner:** `public/og-image.jpg` (1200×630). It's used automatically when the link is shared, and you can also post it as an image.
 - **Gameplay clip and screenshots:** sent to you in the chat, not stored in the repo:
   - a 30-second MP4
-  - 5 screenshots: knock & run, the warden's torch, Boss Night bikes, story photo, story email
+  - 5 screenshots: knock & run, the warden's torch, Boss Night bikes, story photo, story ending
 - **Tip:** a 15–20 second screen recording from your own phone often gets more views than a polished clip, because it looks real. On Android, use the Screen record tile in quick settings. On iPhone, use Control Centre → Screen Recording. Play in landscape.
 
 ---
@@ -61,7 +61,7 @@ Attach the **clip** (LinkedIn plays videos right in the feed), or the banner ima
 > 🎮 Easy & Hard modes (seniors away on internship vs. back and bored)
 > 👥 Online co-op: play with a friend on two phones, no install
 > 🏍️ A Boss Night finale against an outsider gang on triple-seat bikes
-> ✊ A Story mode, "Speak Up": it starts at 2 AM, when drunk seniors drag you and your friends out of your rooms and nobody does anything. Then you collect proof, convince scared juniors, and file an anonymous anti-ragging complaint
+> ✊ A Story mode, "Speak Up": it starts at 2 AM, when drunk seniors drag you and your friends out of your rooms and nobody does anything. Then you click photos of the ragging, convince scared juniors to give statements, and take it all to the warden to complain
 > 🏆 An online TOP 10 leaderboard with random anonymous names
 >
 > The Story mode matters most to me. Ragging is often treated as a "tradition" that nobody questions. In the game, speaking up is how you win, and the ending points to real help (the National Anti-Ragging Helpline: 1800-180-5522).

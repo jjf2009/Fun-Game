@@ -53,7 +53,7 @@ Tap **STORY** on the menu. It's set in the Old Days, before the hostel had prope
 | 1 · Fresher | Sneak past a senior who is ragging a junior and get to your room. Then, at 2 AM, drunk seniors drag you and your friends out, and nobody does anything |
 | 2 · Evidence | Photograph 3 ragging scenes without walking into a senior's sight cone. If he catches you, he deletes your photos |
 | 3 · Witnesses | Talk to scared juniors and pick the right words. Kind, honest answers get a statement, and the junior becomes your **ally** (if a senior catches you, an ally distracts him) |
-| 4 · Speak Up | Reach the common room PC, send the anti-ragging complaint **anonymously** (with the proof: photos, statements and dates), then hide till morning |
+| 4 · Speak Up | The seniors are hunting for "the complainer". Get to **Warden Sir's office** and complain: show him your photos and the juniors' statements, and tell him about 2 AM. Then watch him deal with the seniors |
 
 The ending shows what happened after the complaint, plus real help: the National Anti-Ragging Helpline **1800-180-5522** and **helpline@antiragging.in**. Your progress is saved, finished chapters can be replayed, and a full run from chapter 1 records your best time. All the story text is in `src/story/chapters.js`.
 
@@ -171,7 +171,7 @@ Want real sprite packs? [Kenney.nl](https://kenney.nl/assets) has thousands of f
 src/
   config.js            names + difficulty numbers
   map.js               hostel layout (tile grid) + path finding
-  scenes/              screens: Menu, NightIntro, Game, UI (HUD), Ragging, GameOver, Story*/Dialogue/Email
+  scenes/              screens: Menu, NightIntro, Game, UI (HUD), Ragging, GameOver, Story*/Dialogue/Complaint
   story/               Story mode: chapter text, StoryDirector (goals per chapter), Watcher (senior with a sight cone)
   objects/             characters: Warden, Senior, Door (+ angry student), Npc (shared base)
   systems/             Gang (bombs), Water, Raid (warden check), EventDirector, Lighting, RoomManager (people in rooms)
