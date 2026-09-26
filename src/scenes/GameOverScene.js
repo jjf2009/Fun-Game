@@ -59,7 +59,7 @@ export default class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     share.on('pointerup', () => {
       const nights = night - 1;
-      const text = `😤 I scored ${score} on ${CONFIG.modes[mode].name} in Hostel Nights and survived ${nights} night${nights === 1 ? '' : 's'} at ${CONFIG.hostelName} before getting suspended (rank: ${title}).\nBeat me 👉 ${shareLink()}`;
+      const text = `😤 I scored ${score} on ${CONFIG.modes[mode].name} in Hostel Nights and survived ${nights} night${nights === 1 ? '' : 's'} at the ${CONFIG.hostelName} before getting suspended (rank: ${title}).\nBeat me 👉 ${shareLink()}`;
       shareText(text, (msg) => share.setText(msg));
     });
 
