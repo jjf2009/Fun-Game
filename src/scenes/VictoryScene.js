@@ -40,7 +40,7 @@ export default class VictoryScene extends Phaser.Scene {
     }).setOrigin(0.5).setShadow(4, 4, '#000', 0, true, true);
     this.tweens.add({ targets: title, scale: 1.06, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-    this.add.text(480, 108, `${CONFIG.bossName} and his gang are SUSPENDED. ${CONFIG.hostelName} is safe!`, {
+    this.add.text(480, 108, `${CONFIG.bossName} and his gang are SUSPENDED. The ${CONFIG.hostelName} is safe!`, {
       fontFamily: FONT, fontSize: '18px', color: '#ffffff', stroke: '#000', strokeThickness: 4,
     }).setOrigin(0.5);
 
@@ -66,7 +66,7 @@ export default class VictoryScene extends Phaser.Scene {
       fontFamily: FONT, fontSize: '16px', color: '#80ffdb', backgroundColor: '#00000088', padding: { x: 8, y: 5 },
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     share.on('pointerup', () => {
-      const text = `🏍️ I got ${CONFIG.bossName}'s gang SUSPENDED and saved ${CONFIG.hostelName} in Hostel Nights (${score} points, ${CONFIG.modes[mode].name} mode)!\nYour turn 👉 ${shareLink()}`;
+      const text = `🏍️ I got ${CONFIG.bossName}'s gang SUSPENDED and saved the ${CONFIG.hostelName} in Hostel Nights (${score} points, ${CONFIG.modes[mode].name} mode)!\nYour turn 👉 ${shareLink()}`;
       shareText(text, (msg) => share.setText(msg));
     });
 

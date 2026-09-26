@@ -34,7 +34,7 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
     title.setShadow(4, 4, '#000000', 0, true, true);
     this.tweens.add({ targets: title, y: 68, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.add.text(cx, 112, `Knock. Run. Survive the night at ${CONFIG.hostelName}.`, {
+    this.add.text(cx, 112, `Knock. Run. Survive the night at the ${CONFIG.hostelName}.`, {
       fontFamily: FONT, fontSize: '18px', color: '#caf0f8', stroke: '#000', strokeThickness: 4,
     }).setOrigin(0.5);
 

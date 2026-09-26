@@ -6,7 +6,7 @@ export const CONFIG = {
   gameTitle: 'HOSTEL NIGHTS',
   shareUrl: 'https://jjf2009.github.io/hostel-nights/', // the link put in WhatsApp shares
   itchUrl: '',                   // your itch.io page, e.g. 'https://yourname.itch.io/hostel-nights' (see ITCH.md)
-  hostelName: 'GEC Boys Hostel',
+  hostelName: 'Boys Hostel',
   wardenName: 'Warden Sir',
   guestName: 'Bunty',            // your non-hosteller friend who sneaks in
   myRoom: 111,                   // your room number (101-116 or 201-216)
