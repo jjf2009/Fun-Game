@@ -5,6 +5,7 @@ export const CONFIG = {
   // ---- Names (personalize these) ----
   gameTitle: 'HOSTEL NIGHTS',
   shareUrl: 'https://jjf2009.github.io/hostel-nights/', // the link put in WhatsApp shares
+  itchUrl: '',                   // your itch.io page, e.g. 'https://yourname.itch.io/hostel-nights' (see ITCH.md)
   hostelName: 'GEC Boys Hostel',
   wardenName: 'Warden Sir',
   guestName: 'Bunty',            // your non-hosteller friend who sneaks in
@@ -93,3 +94,10 @@ export const CONFIG = {
 
 export const FONT = '"Pixelify Sans", monospace';       // pixel font for normal text
 export const TITLE_FONT = '"Press Start 2P", monospace'; // chunky arcade font for titles
+
+// The link to put in share messages: the itch.io page when playing on itch, otherwise the website.
+export function shareLink() {
+  const host = window.location.hostname;
+  const onItch = host.endsWith('itch.zone') || host.endsWith('itch.io');
+  return onItch && CONFIG.itchUrl ? CONFIG.itchUrl : CONFIG.shareUrl;
+}

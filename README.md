@@ -139,6 +139,8 @@ To test without Firebase, add `?leaderboard=mock` to the game URL. That uses a f
 
 ## Sharing the game
 
+To publish on **itch.io**, follow [`ITCH.md`](ITCH.md). `npm run build:itch` makes the upload zip, and the cover and screenshots are in `docs/itch/`.
+
 Ready-to-post WhatsApp and LinkedIn text, plus a pre-launch checklist, are in [`LAUNCH.md`](LAUNCH.md). The link preview image is `public/og-image.jpg`, and the share link used by the in-game buttons is `CONFIG.shareUrl`.
 
 ## Make it YOUR hostel
