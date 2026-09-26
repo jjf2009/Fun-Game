@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "build:itch": "node scripts/zip-itch.mjs"
   },
   "dependencies": {
     "@dicebear/core": "^9.4.3",
@@ -19,6 +20,7 @@
     "phaser": "^3.90.0"
   },
   "devDependencies": {
+    "adm-zip": "^0.6.1",
     "vite": "^6.4.3"
   }
 }

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONFIG, FONT, TITLE_FONT } from '../config.js';
+import { CONFIG, shareLink, FONT, TITLE_FONT } from '../config.js';
 import { getBest, saveBest } from '../storage.js';
 import { shareText } from '../mobile.js';
 import { coopEndButtons } from '../net/session.js';
@@ -59,7 +59,7 @@ export default class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     share.on('pointerup', () => {
       const nights = night - 1;
-      const text = `😤 I scored ${score} on ${CONFIG.modes[mode].name} in Hostel Nights and survived ${nights} night${nights === 1 ? '' : 's'} at ${CONFIG.hostelName} before getting suspended (rank: ${title}).\nBeat me 👉 ${CONFIG.shareUrl}`;
+      const text = `😤 I scored ${score} on ${CONFIG.modes[mode].name} in Hostel Nights and survived ${nights} night${nights === 1 ? '' : 's'} at ${CONFIG.hostelName} before getting suspended (rank: ${title}).\nBeat me 👉 ${shareLink()}`;
       shareText(text, (msg) => share.setText(msg));
     });
 
