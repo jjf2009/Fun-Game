@@ -70,7 +70,7 @@ The ending shows what happened after the complaint, plus real help: the National
 | 🚿 **Freshness** | Drains over time. Refill at the bathroom taps. During a **water cut**, find the water bucket. |
 | 🛏️ **Hide** | Two hiding spots, always available: **your room** and the **bathroom stall**. Press ACT there to hide for up to 7 seconds. |
 
-Each night runs from 11 PM to 5 AM (~2.5 minutes). Survive to earn a bonus and one life back.
+Each night runs from 11 PM to 5 AM (~2.5 minutes). Survive to earn a bonus, and every night starts with full hearts.
 
 **The story:** in the Old Days (Nights 1–3) the college security guard sleeps at the gate, so the seniors do whatever they want. Night 4 explains what changed: after an event, a junior was dragged out of the hostel and beaten up by seniors, and the college finally brought in **special security**. From then on there are fewer gang attacks and fewer seniors, but a stricter warden.
 

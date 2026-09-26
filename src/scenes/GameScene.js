@@ -763,12 +763,12 @@ export default class GameScene extends Phaser.Scene {
     const bonus = 100 * this.night;
     this.score += bonus;
     sfx.win();
-    this.banner(`☀️ MORNING! You survived Night ${this.night}!  +${bonus}`, '#ffe066');
+    this.banner(`☀️ MORNING! You survived Night ${this.night}!  +${bonus}  ·  Hearts refilled ❤️`, '#ffe066');
     this.cameras.main.flash(800, 255, 240, 200);
     this.time.delayedCall(2500, () => this.leave('NightIntro', {
       night: this.night + 1,
       score: this.score,
-      lives: Math.min(this.lives + 1, this.modeCfg.lives),
+      lives: this.modeCfg.lives, // every night starts with full hearts
       knocks: this.knocks,
       mode: this.mode,
     }));
